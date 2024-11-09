@@ -1,6 +1,6 @@
 [tool.poetry]  # https://python-poetry.org/docs/pyproject/
 name = "orval"
-version = "0.0.0"
+version = "0.0.1"
 description = "A Python package that contains a small set of convenient python functions"
 authors = []
 license = "Proprietary"
