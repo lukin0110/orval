@@ -1,0 +1,12 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v0.4.1
+_src_path: git@github.com:lukin0110/poetry-copier.git
+ci: github
+description: A Python package that contains a small set of convenient python functions
+name: Orval
+package_type: package
+repository_url: https://github.com/lukin0110/orval/
+use_makefile: true
+use_private_package_repository: false
+use_private_publish_repository: false
+use_pydantic: false
