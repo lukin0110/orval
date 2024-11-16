@@ -4,7 +4,7 @@
 
 A Python package containing a small set of utility functions not found in Python's standard library. It is lightweight, written in pure Python, and has no dependencies.
 
-Why is it named `orval`? Because other utility names are boring and it's a tasty [Belgian beer](https://en.wikipedia.org/wiki/Orval_Brewery) :) 
+Why is it named `orval`? Because other utility names are boring and it's a tasty [Belgian beer](https://en.wikipedia.org/wiki/Orval_Brewery) 🤘❤️
 
 ## 🚀 Using
 

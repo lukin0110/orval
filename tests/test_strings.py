@@ -149,7 +149,7 @@ def test_snake_case(string: str, scream: bool, expected: str) -> None:
         ("a", 2, "...", "a"),
     ],
 )
-def test_truncate(string: str, number: int, suffix: str, expected: str) -> None:
+def test_truncate(string: str, number: int, suffix: str, expected: str | type[ValueError]) -> None:
     """Should truncate a string to a certain number of characters."""
     if expected is ValueError:
         with pytest.raises(ValueError, match="Number must be a positive integer."):

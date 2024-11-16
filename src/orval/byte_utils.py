@@ -46,7 +46,7 @@ def pretty_bytes(size: int, fmt: str = "ds", /, precision: int = 2) -> str:
 
     Parameters
     ----------
-    size_bytes : int
+    size : int
         The size in bytes.
     fmt : str
         The format to use. One of "ds", "dl", "bs", "bl".
