@@ -36,6 +36,7 @@ snake_case("Great Scott")
 from orval import slugify
 slugify("Great scott !! 🤘")
 # Output: great-scott
+# Slightly different from kebab_case, slugify is a good fit for URL paths or infrastructure resource names.
 ```
 
 ```python
