@@ -1,7 +1,7 @@
 [tool.poetry]  # https://python-poetry.org/docs/pyproject/
 name = "orval"
-version = "0.0.2"
-description = "A Python package that contains a small set of convenient python functions"
+version = "0.0.3"
+description = "A Python package containing a small set of utility functions not found in Python's standard library. It is lightweight, written in pure Python, and has no dependencies."
 authors = []
 license = "Proprietary"
 readme = "README.md"
