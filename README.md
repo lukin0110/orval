@@ -59,6 +59,16 @@ chunkify([1, 2, 3, 4, 5, 6], 2)
 # Output: [[1, 2], [3, 4], [5, 6]]
 ```
 
+```python
+from orval import flatten
+list(flatten([[1, 2], [3, [4]]]))
+# Output: [1, 2, 3, 4]
+list(flatten([[1, 2], [3, [4]]], depth=1))
+# Output: [1, 2, 3, [4]]
+list(flatten([{1, 2}, [{3}, (4,)]]))
+# Output: [1, 2, 3, 4]
+```
+
 ### Misc utils
 ```python
 # Hash any Python object.
