@@ -1,8 +1,81 @@
-"""."""
+"""Tests for the string manipulation functions."""
 
 import pytest
 
-from orval import camel_case, kebab_case, pascal_case, snake_case, train_case, truncate
+from orval import camel_case, kebab_case, pascal_case, slugify, snake_case, train_case, truncate
+
+
+@pytest.mark.parametrize(
+    ("string", "scream", "expected"),
+    [
+        ("great scott", False, "great-scott"),
+        ("Great Scott", False, "great-scott"),
+        ("great.scott", False, "great-scott"),
+        ("Great.Scott", False, "great-scott"),
+        ("great_scott", False, "great_scott"),
+        ("Great_Scott", False, "great_scott"),
+        ("great    scott", False, "great-scott"),
+        ("Great    Scott", False, "great-scott"),
+        ("!!Great    Scott!!", False, "great-scott"),
+        ("great", False, "great"),
+        ("hello world again", False, "hello-world-again"),
+        ("  great   scott  ", False, "great-scott"),
+        ("GREAT SCOTT", False, "great-scott"),
+        ("GREAT SCOTT", True, "GREAT-SCOTT"),
+        ("", False, ""),
+        ("", True, ""),
+        ("single", False, "single"),
+        ("multiple words in a string", False, "multiple-words-in-a-string"),
+        ("!!", False, ""),
+        ("great scott", True, "GREAT-SCOTT"),
+        ("Great Scott", True, "GREAT-SCOTT"),
+        ("hello", True, "HELLO"),
+        ("hello world again", True, "HELLO-WORLD-AGAIN"),
+        ("  great   scott  ", True, "GREAT-SCOTT"),
+        ("single", True, "SINGLE"),
+        ("multiple words in a string", True, "MULTIPLE-WORDS-IN-A-STRING"),
+        ("!!öì 💩", True, "ÖÌ"),
+        ("!!ö ì 💩", True, "Ö-Ì"),
+        ("こんにちは世界", True, "こんにちは世界"),
+        ("こんにちは世界", False, "こんにちは世界"),
+        ("Hello 世界", True, "HELLO-世界"),
+        ("Hello 世界", False, "hello-世界"),
+        ("Hello 世界 W", False, "hello-世界-w"),
+    ],
+)
+def test_kebab_case(string: str, scream: bool, expected: str) -> None:
+    """Should convert a string to kebab-case."""
+    assert kebab_case(string, scream) == expected
+
+
+@pytest.mark.parametrize(
+    ("string", "expected"),
+    [
+        ("Hello World", "hello-world"),
+        ("Hello world", "hello-world"),
+        ("Héllo Wörld", "hello-world"),
+        ("Hello.World", "hello-world"),
+        ("Hello.world", "hello-world"),
+        ("Hello-World", "hello-world"),
+        ("Hello-world", "hello-world"),
+        ("Hello   World", "hello-world"),
+        ("Hello   world", "hello-world"),
+        ("Hello_World", "hello_world"),
+        ("Hello_world", "hello_world"),
+        ("", ""),
+        ("    ", ""),
+        ("!!Hello World!!", "hello-world"),
+        ("こんにちは世界", ""),
+        ("Hello 世界", "hello"),
+        ("Hello 世界-W", "hello-w"),
+        ("!!", ""),
+        ("!!öì 💩", "oi"),
+        ("!!ö ì 💩", "o-i"),
+    ],
+)
+def test_slugify(string: str, expected: str) -> None:
+    """Should create a slug from a given string."""
+    assert slugify(string) == expected
 
 
 @pytest.mark.parametrize(
@@ -68,38 +141,7 @@ def test_pascal_case(string: str, expected: str) -> None:
 )
 def test_train_case(string: str, expected: str) -> None:
     """Should convert a string to train-case."""
-    assert train_case(string) == expected
-
-
-@pytest.mark.parametrize(
-    ("string", "scream", "expected"),
-    [
-        ("great scott", False, "great-scott"),
-        ("Great Scott", False, "great-scott"),
-        ("great", False, "great"),
-        ("hello world again", False, "hello-world-again"),
-        ("  great   scott  ", False, "great-scott"),
-        ("GREAT SCOTT", False, "great-scott"),
-        ("GREAT SCOTT", True, "GREAT-SCOTT"),
-        ("", False, ""),
-        ("", True, ""),
-        ("single", False, "single"),
-        ("multiple words in a string", False, "multiple-words-in-a-string"),
-        ("!!", False, ""),
-        ("great scott", True, "GREAT-SCOTT"),
-        ("Great Scott", True, "GREAT-SCOTT"),
-        ("hello", True, "HELLO"),
-        ("hello world again", True, "HELLO-WORLD-AGAIN"),
-        ("  great   scott  ", True, "GREAT-SCOTT"),
-        ("single", True, "SINGLE"),
-        ("multiple words in a string", True, "MULTIPLE-WORDS-IN-A-STRING"),
-        ("!!öì 💩", True, "ÖÌ"),
-        ("!!ö ì 💩", True, "Ö-Ì"),
-    ],
-)
-def test_kebab_case(string: str, scream: bool, expected: str) -> None:
-    """Should convert a string to kebab-case."""
-    assert kebab_case(string, scream) == expected
+    assert train_case(string, unicode=True) == expected
 
 
 @pytest.mark.parametrize(

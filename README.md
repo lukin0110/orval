@@ -15,28 +15,40 @@ pip install orval
 
 Example usage:
 ```python
+from orval import kebab_case
+kebab_case("Great Scott")
+# Output: great-scott
+kebab_case("Gréat Scött")
+# Output: gréat-scött
+```
+
+```python
+# Slightly different from kebab_case, it does not allow Unicode characters.
+# Slugify is well-suited for URL paths or infrastructure resource names (e.g., database names).
+from orval import slugify
+slugify("Great scott !! 🤘")
+# Output: great-scott
+slugify("Gréat scött !! 🤘")
+# Output: great-scott
+```
+
+```python
 from orval import camel_case
-camel_case("Great scott")
+camel_case(" Great scott ")
 # Output: greatScott
 ```
 
 ```python
-from orval import kebab_case
-kebab_case("Great Scott")
-# Output: great-scott
-```
-
-```python
 from orval import snake_case
-snake_case("Great Scott")
+snake_case(" Great  Scott ")
 # Output: great_scott
 ```
 
 ```python
-from orval import slugify
-slugify("Great scott !! 🤘")
-# Output: great-scott
-# Slightly different from kebab_case, slugify is a good fit for URL paths or infrastructure resource names.
+# Train-Case is well-suited for HTTP headers.
+from orval import train_case
+train_case(" content type ")
+# Output: Content-Type
 ```
 
 ```python
