@@ -13,7 +13,7 @@ To install this package, run:
 pip install orval
 ```
 
-Example usage:
+### String utils
 ```python
 from orval import kebab_case
 kebab_case("Great Scott")
@@ -23,7 +23,7 @@ kebab_case("Gréat Scött")
 ```
 
 ```python
-# Slightly different from kebab_case, it does not allow Unicode characters.
+# Slightly different from kebab_case. It does not allow Unicode characters.
 # Slugify is well-suited for URL paths or infrastructure resource names (e.g., database names).
 from orval import slugify
 slugify("Great scott !! 🤘")
@@ -51,10 +51,26 @@ train_case(" content type ")
 # Output: Content-Type
 ```
 
+### Array utils
+
 ```python
 from orval import chunkify
 chunkify([1, 2, 3, 4, 5, 6], 2)
 # Output: [[1, 2], [3, 4], [5, 6]]
+```
+
+### Misc utils
+```python
+# Hash any Python object.
+from orval import hashify
+hashify("great scott")
+# Output: 6617ae826b0b76ba9f3a568a2bbf6c67aec8f575eec69badaf7110091d3f5cc6
+hashify({"great": "scott"})
+# Output: 1d63b966aa065f76392c3e4a7caa7b1bfce39c889e5faf0df0198b9ff5d0f434
+def marty():
+    return "McFly"
+hashify(marty)
+# Output: f2f21c93c543f023db0ab78ded26bbc5dabb59bb65b0b458b503cdcb0c3389e4
 ```
 
 ```python
@@ -69,7 +85,7 @@ pretty_bytes(20000000, "dl", precision=0)
 # Output: 19 Mebibytes
 ```
 
-See all available functions in [__init__.py](src/orval/__init__.py).
+See all available functions in [\_\_init\_\_.py](src/orval/__init__.py).
 
 ## 🧑‍💻 Contributing
 
