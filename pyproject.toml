@@ -1,6 +1,6 @@
 [tool.poetry]  # https://python-poetry.org/docs/pyproject/
 name = "orval"
-version = "0.0.4"
+version = "0.0.5"
 description = "A Python package containing a small set of utility functions not found in Python's standard library. It is lightweight, written in pure Python, and has no dependencies."
 authors = []
 license = "Proprietary"
@@ -12,11 +12,11 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]  # https://python-poetry.org/docs/dependency-specification/
-python = ">=3.13.0,<4.0"
+python = ">=3.9.0,<4.0"
 
 [tool.poetry.group.dev.dependencies]  # https://python-poetry.org/docs/master/managing-dependencies/
 coverage = { extras = ["toml"], version = ">=7.4.1" }
-ipython = ">=8.29.0"
+ipython = ">=8.18.1"
 mypy = "1.13.0"
 poethepoet = ">=0.29.0"
 pre-commit = ">=4.0.1"

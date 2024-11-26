@@ -36,12 +36,12 @@ def _normalize(string: str, unicode: bool = True, compact_spaces: bool = True) -
         # Normalize the string to Normalization Form Compatibility Composition (NFKC).
         # This will replace multiple representation by a normalized one. E.g. 'ö' can have two representations.
         value = unicodedata.normalize("NFKC", string)
-        text = re.sub(r"[^\w\s]", " ", value, flags=re.UNICODE)
+        text = re.sub(r"[^\w\s]|_", " ", value, flags=re.UNICODE)
     else:
         # Normalize the string to Normalization Form Compatibility Decomposition (NFKD).
         # This will replace the diacritics by ASCII characters. E.g. 'ö' will be replaced by 'o' and 'ì' by 'i'.
         value = unicodedata.normalize("NFKD", string).encode("ascii", "ignore").decode("ascii")
-        text = re.sub(r"[^\w\s]", " ", value)
+        text = re.sub(r"[^\w\s]|_", " ", value)
 
     # Replace multiple spaces with a single space
     return re.sub(r"\s+", " ", text).strip() if compact_spaces else text.strip()
