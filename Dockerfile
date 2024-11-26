@@ -2,16 +2,16 @@
 ARG PYTHON_VERSION=3.13.0
 FROM python:$PYTHON_VERSION-slim AS base
 
-LABEL org.opencontainers.image.description "A Python package that contains a small set of convenient python functions"
+LABEL org.opencontainers.image.description="A Python package that contains a small set of convenient python functions"
 
 # Configure Python to print tracebacks on crash [1], and to not buffer stdout and stderr [2].
 # [1] https://docs.python.org/3/using/cmdline.html#envvar-PYTHONFAULTHANDLER
 # [2] https://docs.python.org/3/using/cmdline.html#envvar-PYTHONUNBUFFERED
-ENV PYTHONFAULTHANDLER 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONFAULTHANDLER=1
+ENV PYTHONUNBUFFERED=1
 
 # Install Poetry.
-ENV POETRY_VERSION 1.8.4
+ENV POETRY_VERSION=1.8.4
 RUN --mount=type=cache,target=/root/.cache/pip/ \
     pip install poetry==$POETRY_VERSION
 
@@ -25,8 +25,8 @@ RUN --mount=type=cache,target=/var/cache/apt/ \
 
 # Create and activate a virtual environment.
 RUN python -m venv /opt/orval-env
-ENV PATH /opt/orval-env/bin:$PATH
-ENV VIRTUAL_ENV /opt/orval-env
+ENV PATH=/opt/orval-env/bin:$PATH
+ENV VIRTUAL_ENV=/opt/orval-env
 
 # Set the working directory.
 WORKDIR /workspaces/orval/
