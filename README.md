@@ -52,6 +52,19 @@ train_case(" content type ")
 ```
 
 ```python
+# Hash any Python object.
+from orval import hashify
+hashify("great scott")
+# Output: 6617ae826b0b76ba9f3a568a2bbf6c67aec8f575eec69badaf7110091d3f5cc6
+hashify({"great": "scott"})
+# Output: 1d63b966aa065f76392c3e4a7caa7b1bfce39c889e5faf0df0198b9ff5d0f434
+def marty():
+    return "McFly"
+hashify(marty)
+# Output: f2f21c93c543f023db0ab78ded26bbc5dabb59bb65b0b458b503cdcb0c3389e4
+```
+
+```python
 from orval import chunkify
 chunkify([1, 2, 3, 4, 5, 6], 2)
 # Output: [[1, 2], [3, 4], [5, 6]]
