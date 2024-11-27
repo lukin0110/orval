@@ -1,25 +1,48 @@
 """Array utilities."""
 
-from collections.abc import Generator, Sequence
+from collections.abc import Generator, Iterable
+from itertools import islice
 from typing import TypeVar
 
 T = TypeVar("T")
 
 
-def chunkify(seq: list[T], s: int) -> list[list[T]]:
-    """Break a list into chunks of size S."""
-    if s < 1:
-        raise ValueError(f"Size must be > 0, invalid value {s}")
-    return [seq[pos : pos + s] for pos in range(0, len(seq), s)]
-
-
-def flatten(seq: Sequence[T] | set[T], depth: int | None = None) -> Generator[T]:
-    """Flattens a nested sequence or set up to a specified depth.
+def chunkify(seq: Iterable[T], s: int) -> list[list[T]]:
+    """Break an interable into chunks of size S.
 
     Parameters
     ----------
-    seq : Sequence | set
-        The sequence or set to flatten.
+    seq : Iterable
+        The iterable to chunk.
+    s : int
+        The size of each chunk.
+
+    Returns
+    -------
+    list
+        A list of chunks.
+    """
+    if s < 1:
+        raise ValueError(f"Size must be > 0, invalid value {s}")
+
+    def _inner(_seq: Iterable[T], _s: int) -> Generator[list[T]]:
+        iterator = iter(_seq)
+        while True:
+            chunk = list(islice(iterator, _s))
+            if not chunk:
+                break
+            yield chunk
+
+    return list(_inner(seq, s))
+
+
+def flatten(seq: Iterable[T], depth: int | None = None) -> Generator[T]:
+    """Flattens a nested iterable up to a specified depth.
+
+    Parameters
+    ----------
+    seq : Iterable
+        The iterable or set to flatten.
     depth : int, optional
         The depth to flatten to. If None, flattens completely.
 
@@ -31,18 +54,18 @@ def flatten(seq: Sequence[T] | set[T], depth: int | None = None) -> Generator[T]
     # Caveat: the error is only raised when the generator is consumed
     if depth is not None and depth < 0:
         raise ValueError(f"Depth must be >= 0, invalid value {depth}")
-    if not isinstance(seq, Sequence | set):
-        raise TypeError("Input must be a sequence or set.")
+    if not isinstance(seq, Iterable):
+        raise TypeError("Input must be an interable (list, set, range, tuple).")
     if isinstance(seq, str):
         yield seq
         return
 
-    def _flatten(_seq: Sequence[T] | set[T], current_depth: int) -> Generator[T]:
+    def _flatten(_seq: Iterable[T], current_depth: int) -> Generator[T]:
         if depth is not None and current_depth >= depth:
             yield from _seq
             return
         for item in _seq:
-            if isinstance(item, Sequence | set) and not isinstance(item, str):
+            if isinstance(item, Iterable) and not isinstance(item, str):
                 yield from _flatten(item, current_depth + 1)
             else:
                 yield item  # type: ignore[misc]
