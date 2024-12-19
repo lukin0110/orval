@@ -184,6 +184,29 @@ def snake_case(string: str, scream: bool = False, unicode: bool = True, compact_
     return text.lower() if not scream else text.upper()
 
 
+def dot_case(string: str, scream: bool = False, unicode: bool = True, compact_spaces: bool = True) -> str:
+    """Convert a string to dot.case.
+
+    Parameters
+    ----------
+    string
+        Input string to transform.
+    scream
+        Convert the output to uppercase.
+    unicode
+        If True, allows Unicode characters in the output string. If False, only ASCII characters are allowed (default is True).
+    compact_spaces
+        If True, multiple consecutive spaces are reduced to a single space (default is True).
+
+    Returns
+    -------
+    str
+        Returns a transformed string.
+    """
+    text = _normalize(string, unicode=unicode, compact_spaces=compact_spaces).replace(" ", ".")
+    return text.lower() if not scream else text.upper()
+
+
 def truncate(string: str, number: int, /, suffix: str = "...") -> str:
     """Truncate a string to a certain number of characters."""
     if number <= 0:

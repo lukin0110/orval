@@ -2,7 +2,7 @@
 
 import pytest
 
-from orval import camel_case, kebab_case, pascal_case, slugify, snake_case, train_case, truncate
+from orval import camel_case, dot_case, kebab_case, pascal_case, slugify, snake_case, train_case, truncate
 
 
 @pytest.mark.parametrize(
@@ -175,6 +175,37 @@ def test_train_case(string: str, expected: str) -> None:
 def test_snake_case(string: str, scream: bool, expected: str) -> None:
     """Should convert a string to snake_case."""
     assert snake_case(string, scream) == expected
+
+
+@pytest.mark.parametrize(
+    ("string", "scream", "expected"),
+    [
+        ("great scott", False, "great.scott"),
+        ("Great Scott", False, "great.scott"),
+        ("great", False, "great"),
+        ("hello world again", False, "hello.world.again"),
+        ("  great   scott  ", False, "great.scott"),
+        ("GREAT SCOTT", False, "great.scott"),
+        ("GREAT SCOTT", True, "GREAT.SCOTT"),
+        ("", False, ""),
+        ("", True, ""),
+        ("single", False, "single"),
+        ("multiple words in a string", False, "multiple.words.in.a.string"),
+        ("!!", False, ""),
+        ("great scott", True, "GREAT.SCOTT"),
+        ("Great Scott", True, "GREAT.SCOTT"),
+        ("hello", True, "HELLO"),
+        ("hello world again", True, "HELLO.WORLD.AGAIN"),
+        ("  great   scott  ", True, "GREAT.SCOTT"),
+        ("single", True, "SINGLE"),
+        ("multiple words in a string", True, "MULTIPLE.WORDS.IN.A.STRING"),
+        ("!!öì 💩", True, "ÖÌ"),
+        ("!!ö ì 💩", True, "Ö.Ì"),
+    ],
+)
+def test_dot_case(string: str, scream: bool, expected: str) -> None:
+    """Should convert a string to dot.case."""
+    assert dot_case(string, scream) == expected
 
 
 @pytest.mark.parametrize(
