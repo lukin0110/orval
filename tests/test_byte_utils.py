@@ -1,6 +1,7 @@
 """Tests for the byte_utils module."""
 
 import pytest
+from typeguard import suppress_type_checks
 
 from orval import pretty_bytes
 
@@ -35,3 +36,10 @@ def test_format_bytes_invalid_format() -> None:
     """Should raise a ValueError for invalid format."""
     with pytest.raises(ValueError, match="Format must be one of"):
         pretty_bytes(1024, "invalid-format", precision=2)
+
+
+@suppress_type_checks
+def test_format_bytes_invalid_type() -> None:
+    """Should raise a TypeError for invalid type."""
+    with pytest.raises(TypeError, match="Size must be an integer."):
+        pretty_bytes("1024", precision=2)  # type: ignore[arg-type]

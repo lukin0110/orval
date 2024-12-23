@@ -38,6 +38,8 @@ _FORMATS: set[str] = {"ds", "dl", "bs", "bl"}
 def pretty_bytes(size: int, fmt: str = "ds", /, precision: int = 2) -> str:
     """Convert a size in bytes to a human-readable string.
 
+    By default, a short decimal format with base 1.000 is used (e.g., 1.23 KB).
+
     Available formats:
     - ds: decimal-short (e.g., 1.23 KB)
     - dl: decimal-long (e.g., 1.23 Kilobytes)
@@ -49,7 +51,7 @@ def pretty_bytes(size: int, fmt: str = "ds", /, precision: int = 2) -> str:
     size : int
         The size in bytes.
     fmt : str
-        The format to use. One of "ds", "dl", "bs", "bl".
+        The format to use. One of "ds", "dl", "bs", "bl". Default is "ds".
     precision : int
         The number of decimal places to round to.
 
@@ -58,6 +60,8 @@ def pretty_bytes(size: int, fmt: str = "ds", /, precision: int = 2) -> str:
     str
         The formatted disk size as a human-readable string.
     """
+    if not isinstance(size, int):
+        raise TypeError("Size must be an integer.")
     if size < 0:
         raise ValueError("Size must be a non-negative integer.")
     if fmt not in _FORMATS:
