@@ -1,11 +1,28 @@
 [tool.poetry]  # https://python-poetry.org/docs/pyproject/
 name = "orval"
-version = "0.0.7"
+version = "0.0.8"
 description = "A Python package containing a small set of utility functions not found in Python's standard library. It is lightweight, written in pure Python, and has no dependencies."
-authors = []
-license = "Proprietary"
+authors = ["Maarten Huijsmans <maarten@lukin.be>"]
+license = "MIT"
 readme = "README.md"
 repository = "https://github.com/lukin0110/orval/"
+classifiers = [
+    "Typing :: Typed",
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Internet",
+    "Topic :: Utilities",
+]
 
 [build-system]  # https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
 requires = ["poetry-core>=1.0.0"]
