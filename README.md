@@ -51,7 +51,7 @@ train_case(" content type ")
 # Output: Content-Type
 ```
 
-### Array utils
+### Collection utils
 
 ```python
 from orval import chunkify

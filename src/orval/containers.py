@@ -2,7 +2,7 @@
 
 from collections.abc import Generator, Iterable
 from itertools import islice
-from typing import TypeVar
+from typing import Any, TypeVar
 
 T = TypeVar("T")
 
@@ -71,3 +71,27 @@ def flatten(seq: Iterable[T], depth: int | None = None) -> Generator[T]:
                 yield item  # type: ignore[misc]
 
     yield from _flatten(seq, 0)
+
+
+def deep_merge(*dicts: dict[Any, Any]) -> dict[Any, Any]:
+    """Deep merge multiple dictionaries.
+
+    Parameters
+    ----------
+      *dicts: One or more dictionaries to merge.
+
+    Returns
+    -------
+    dict
+        The merged dictionary.
+    """
+    if not all(isinstance(d, dict) for d in dicts):
+        raise TypeError("All inputs must be dictionaries.")
+    result: dict[Any, Any] = {}
+    for d in dicts:
+        for k, v in d.items():
+            if k in result and isinstance(result[k], dict) and isinstance(v, dict):
+                result[k] = deep_merge(result[k], v)
+            else:
+                result[k] = v
+    return result
