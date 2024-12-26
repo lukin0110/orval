@@ -6,7 +6,7 @@ from typing import Any
 import pytest
 from typeguard import suppress_type_checks
 
-from orval import chunkify, flatten
+from orval import chunkify, deep_merge, flatten
 
 
 @pytest.mark.parametrize(
@@ -66,3 +66,32 @@ def test_flatten_invalid_type() -> None:
     """Should raise a TypeError for invalid type."""
     with pytest.raises(TypeError, match=r"Input must be an interable \(list, set, range, tuple\)\."):
         list(flatten(1, 1))  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+    ("dicts", "expected"),
+    [
+        ([{"a": 1}, {"b": 2}], {"a": 1, "b": 2}),
+        ([{"a": {"b": 1}}, {"a": {"c": 2}}], {"a": {"b": 1, "c": 2}}),
+        ([{"a": 1}, {"a": {"b": 2}}], {"a": {"b": 2}}),
+        ([{"a": {"b": 1}}, {"a": 2}], {"a": 2}),
+        ([{"a": 1}, {"b": {"c": 2}}, {"b": {"d": 3}}], {"a": 1, "b": {"c": 2, "d": 3}}),
+    ],
+)
+def test_deep_merge(dicts: list[dict[Any, Any]], expected: dict[Any, Any]) -> None:
+    """Should return a deeply merged dictionary."""
+    assert deep_merge(*dicts) == expected
+
+
+@suppress_type_checks
+@pytest.mark.parametrize(
+    "invalid_input",
+    [
+        [1, {"a": 1}],
+        [{"a": 1}, [2]],
+    ],
+)
+def test_deep_merge_invalid_input(invalid_input: list[Any]) -> None:
+    """Should raise a TypeError for invalid input."""
+    with pytest.raises(TypeError, match="All inputs must be dictionaries."):
+        deep_merge(*invalid_input)
