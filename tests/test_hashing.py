@@ -49,7 +49,7 @@ def test__different_algorithms__success(alg_1: str, alg_2: str) -> None:
 
 def test___unsupported_algorithm__fairure() -> None:
     """Should raise a ValueError for an unsupported algorithm."""
-    with pytest.raises(ValueError, match="Hashing algorithm 'unsupported_alg' not supported."):
+    with pytest.raises(ValueError, match=r"Hashing algorithm 'unsupported_alg' not supported."):
         hashify("", alg="unsupported_alg")
 
 
