@@ -93,5 +93,5 @@ def test_deep_merge(dicts: list[dict[Any, Any]], expected: dict[Any, Any]) -> No
 )
 def test_deep_merge_invalid_input(invalid_input: list[Any]) -> None:
     """Should raise a TypeError for invalid input."""
-    with pytest.raises(TypeError, match="All inputs must be dictionaries."):
+    with pytest.raises(TypeError, match=r"All inputs must be dictionaries."):
         deep_merge(*invalid_input)
