@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-ARG PYTHON_VERSION=3.13.0
+ARG PYTHON_VERSION=3.14.3
 FROM python:$PYTHON_VERSION-slim AS base
 
 LABEL org.opencontainers.image.description="A Python package that contains a small set of convenient python functions"
@@ -10,10 +10,10 @@ LABEL org.opencontainers.image.description="A Python package that contains a sma
 ENV PYTHONFAULTHANDLER=1
 ENV PYTHONUNBUFFERED=1
 
-# Install Poetry.
-ENV POETRY_VERSION=1.8.4
+# Install uv.
+ENV UV_VERSION=0.10.7
 RUN --mount=type=cache,target=/root/.cache/pip/ \
-    pip install poetry==$POETRY_VERSION
+    pip install uv==$UV_VERSION
 
 # Install curl & compilers that may be required for certain packages or platforms.
 # The stock ubuntu image cleans up /var/cache/apt automatically. This makes the build process slow.
@@ -24,16 +24,17 @@ RUN --mount=type=cache,target=/var/cache/apt/ \
     apt-get update && apt-get install --no-install-recommends --yes curl build-essential
 
 # Create and activate a virtual environment.
+# https://docs.astral.sh/uv/concepts/projects/config/#project-environment-path
 RUN python -m venv /opt/orval-env
 ENV PATH=/opt/orval-env/bin:$PATH
 ENV VIRTUAL_ENV=/opt/orval-env
+ENV UV_PROJECT_ENVIRONMENT=$VIRTUAL_ENV
 
 # Set the working directory.
 WORKDIR /workspaces/orval/
 
-# Touch minimal files to allow Poetry to install dependencies.
-RUN mkdir -p /root/.cache/pypoetry/ && mkdir -p /root/.config/pypoetry/ && \
-    mkdir -p src/orval/ && touch src/orval/__init__.py && touch README.md
+# Touch minimal files to allow uv to install dependencies.
+RUN mkdir -p /root/.cache/uv && mkdir -p src/orval/ && touch src/orval/__init__.py && touch README.md
 
 
 
@@ -57,9 +58,9 @@ RUN --mount=type=cache,target=/var/cache/apt/ \
     git config --system --add safe.directory '*'
 
 # Install the run time Python dependencies in the virtual environment.
-COPY poetry.lock* pyproject.toml /workspaces/orval/
-RUN --mount=type=cache,target=/root/.cache/pypoetry/ \
-    poetry install --no-interaction --no-ansi
+COPY uv.lock* pyproject.toml /workspaces/orval/
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --all-extras --frozen --compile-bytecode --link-mode copy --python-preference only-system
 
 # Install pre-commit hooks & activate starship.
 COPY .pre-commit-config.yaml /workspaces/orval/
