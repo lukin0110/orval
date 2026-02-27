@@ -116,7 +116,6 @@ See all available functions in [\_\_init\_\_.py](src/orval/__init__.py).
 Go to [VS Code](https://code.visualstudio.com/), download and install VS Code.
 </details>
 
-
 </details>
 
 #### 1. Open DevContainer with VS Code
@@ -134,9 +133,9 @@ poe lint
 poe test
 ```
 
-#### 4. Update poetry lock file
+#### 4. Update uv lock file
 ```bash
-poetry lock --no-update
+uv lock
 ```
 
 ---

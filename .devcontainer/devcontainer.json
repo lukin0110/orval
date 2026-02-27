@@ -17,17 +17,16 @@
   "customizations": {
     "vscode": {
       "extensions": [
+        "astral-sh.ty",
         "charliermarsh.ruff",
         "eamodio.gitlens",
-        "github.copilot",
+        "GitHub.copilot-chat",
         "GitHub.vscode-github-actions",
         "GitHub.vscode-pull-request-github",
         "ms-azuretools.vscode-docker",
-        "ms-python.mypy-type-checker",
         "ms-python.python",
         "ryanluker.vscode-coverage-gutters",
-        "tamasfe.even-better-toml",
-        "visualstudioexptteam.vscodeintellicode"
+        "tamasfe.even-better-toml"
       ],
       "settings": {
         "coverage-gutters.coverageFileNames": [
@@ -51,8 +50,6 @@
         "[toml]": {
           "editor.formatOnSave": false
         },
-        "mypy-type-checker.importStrategy": "fromEnvironment",
-        "mypy-type-checker.preferDaemon": true,
         "python.defaultInterpreterPath": "/opt/orval-env/bin/python",
         "python.terminal.activateEnvironment": false,
         "python.testing.pytestEnabled": true,

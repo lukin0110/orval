@@ -9,7 +9,7 @@ from typing import Any, TypeVar
 R = TypeVar("R")
 
 
-def timing(func: Callable[..., R] | None = None, level: int = logging.INFO) -> Any:
+def timing(func: Callable[..., R] | None = None, level: int = logging.INFO) -> Any:  # noqa: UP047
     """Log the elapsed time of a function.
 
     Decorator can be used with or without arguments. Eg: `@timing` or `@timing(level=logging.DEBUG)`.
@@ -37,7 +37,7 @@ def timing(func: Callable[..., R] | None = None, level: int = logging.INFO) -> A
         start = time.perf_counter()
         result = func(*args, **kwargs)
         end = time.perf_counter()
-        logging.getLogger(__name__).log(level, f"Timing for '{func.__name__}': {end - start:.3f}s")
+        logging.getLogger(__name__).log(level, f"Timing for '{func.__name__}': {end - start:.3f}s")  # type: ignore[unresolved-attribute]
         return result
 
     return wrapper
