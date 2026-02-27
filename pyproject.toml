@@ -1,6 +1,6 @@
 [project]  # https://packaging.python.org/en/latest/specifications/pyproject-toml/
 name = "orval"
-version = "0.0.8"
+version = "0.0.9"
 description = "A Python package containing a small set of utility functions not found in Python's standard library. It is lightweight, written in pure Python, and has no dependencies."
 authors = [
   { name = "Maarten Huijsmans", email = "maarten@lukin.be" },
