@@ -139,8 +139,8 @@ uv lock
 ```
 
 ---
-See how to develop with [PyCharm or any other IDE](https://github.com/lukin0110/poetry-copier/tree/main/docs/ide.md).
+See how to develop with [PyCharm or any other IDE](https://github.com/lukin0110/uv-copier/tree/main/docs/ide.md).
 
 ---
-️⚡️ Scaffolded with [Poetry Copier](https://github.com/lukin0110/poetry-copier/).\
-🛠️ [Open an issue](https://github.com/lukin0110/poetry-copier/issues/new) if you have any questions or suggestions.
+️⚡️ Scaffolded with [Uv Copier](https://github.com/lukin0110/uv-copier/).\
+🛠️ [Open an issue](https://github.com/lukin0110/uv-copier/issues/new) if you have any questions or suggestions.

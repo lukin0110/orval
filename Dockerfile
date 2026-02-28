@@ -25,9 +25,8 @@ RUN --mount=type=cache,target=/var/cache/apt/ \
 
 # Create and activate a virtual environment.
 # https://docs.astral.sh/uv/concepts/projects/config/#project-environment-path
-RUN python -m venv /opt/orval-env
-ENV PATH=/opt/orval-env/bin:$PATH
-ENV VIRTUAL_ENV=/opt/orval-env
+ENV VIRTUAL_ENV=/opt/venv
+ENV PATH=$VIRTUAL_ENV/bin:$PATH
 ENV UV_PROJECT_ENVIRONMENT=$VIRTUAL_ENV
 
 # Set the working directory.
@@ -41,7 +40,7 @@ RUN mkdir -p /root/.cache/uv && mkdir -p src/orval/ && touch src/orval/__init__.
 FROM base AS dev
 
 # Install DevContainer utilities: zsh, git, docker cli, starship prompt.
-# Docker: only docker cli is installeed and not the entire engine.
+# Docker: only docker cli is installed and not the entire engine.
 RUN --mount=type=cache,target=/var/cache/apt/ \
     --mount=type=cache,target=/var/lib/apt/ \
     apt-get update && apt-get install --yes --no-install-recommends openssh-client git zsh gnupg  && \
