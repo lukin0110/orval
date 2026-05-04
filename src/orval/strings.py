@@ -4,8 +4,13 @@ More info on casing naming conventions:
 https://en.wikipedia.org/wiki/Naming_convention_(programming)
 """
 
+import html
 import re
 import unicodedata
+
+_HTML_TAG_RE = re.compile(r"<[^<>]+>")
+# Zero-width and bidi-formatting characters that often hitchhike with copy/pasted text.
+_ZERO_WIDTH_RE = re.compile("[​-‏‪-‮⁠-⁯﻿]")
 
 
 def _normalize(string: str, unicode: bool = True, compact_spaces: bool = True) -> str:
@@ -214,3 +219,35 @@ def truncate(string: str, number: int, /, suffix: str = "...") -> str:
     if len(string) <= number:
         return string
     return f"{string[: number - 1]}{suffix}"
+
+
+def strip_styling(string: str) -> str:
+    """Strip styling from text to obtain plain text.
+
+    Useful when text gets copy/pasted into an HTML input field from a styled
+    source (e.g., word processor, social media, rich text editor). It:
+
+    - Removes HTML tags (e.g., ``<b>``, ``<i>``, ``<span style="...">``).
+    - Decodes HTML entities (e.g., ``&amp;`` → ``&``, ``&lt;`` → ``<``).
+    - Normalizes Unicode 'styled' characters from the Mathematical Alphanumeric
+      Symbols block (bold, italic, script, fraktur, double-struck, monospace,
+      etc.) to their plain equivalents.
+    - Collapses ligatures and full-width forms (e.g., ``ﬁ`` → ``fi``, ``Ａ`` → ``A``).
+    - Removes zero-width and bidi-formatting characters.
+
+    Diacritics and non-ASCII letters are preserved (e.g., ``café`` stays ``café``).
+
+    Parameters
+    ----------
+    string
+        Input string to strip styling from.
+
+    Returns
+    -------
+    str
+        Returns the plain text version of the input.
+    """
+    without_tags = _HTML_TAG_RE.sub("", string)
+    decoded = html.unescape(without_tags)
+    normalized = unicodedata.normalize("NFKC", decoded)
+    return _ZERO_WIDTH_RE.sub("", normalized)

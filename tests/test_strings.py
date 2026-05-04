@@ -2,7 +2,17 @@
 
 import pytest
 
-from orval import camel_case, dot_case, kebab_case, pascal_case, slugify, snake_case, train_case, truncate
+from orval import (
+    camel_case,
+    dot_case,
+    kebab_case,
+    pascal_case,
+    slugify,
+    snake_case,
+    strip_styling,
+    train_case,
+    truncate,
+)
 
 
 @pytest.mark.parametrize(
@@ -231,3 +241,44 @@ def test_truncate(string: str, number: int, suffix: str, expected: str | type[Va
             truncate(string, number, suffix)
     else:
         assert truncate(string, number, suffix) == expected
+
+
+@pytest.mark.parametrize(
+    ("string", "expected"),
+    [
+        ("plain text", "plain text"),
+        ("", ""),
+        # HTML tags.
+        ("<b>bold</b>", "bold"),
+        ("<i>italic</i>", "italic"),
+        ("<span style='font-weight:bold'>hello</span>", "hello"),
+        ("<p>hello <strong>world</strong></p>", "hello world"),
+        ("<br/>line<br/>", "line"),
+        # HTML entities.
+        ("Tom &amp; Jerry", "Tom & Jerry"),
+        ("&lt;tag&gt;", "<tag>"),
+        ("caf&eacute;", "café"),
+        # Unicode-styled characters from Mathematical Alphanumeric Symbols.
+        ("𝐛𝐨𝐥𝐝", "bold"),
+        ("𝑖𝑡𝑎𝑙𝑖𝑐", "italic"),
+        ("𝓯𝓪𝓷𝓬𝔂", "fancy"),
+        ("𝔅𝔩𝔞𝔠𝔨", "Black"),
+        ("𝙼𝙾𝙽𝙾", "MONO"),
+        ("𝔸ℂ𝔻", "ACD"),
+        ("𝟏𝟐𝟑", "123"),
+        # Ligatures and full-width forms.
+        ("ﬁre", "fire"),
+        ("Ｈｅｌｌｏ", "Hello"),
+        # Diacritics are preserved.
+        ("café", "café"),
+        ("Héllo Wörld", "Héllo Wörld"),
+        # Combined: HTML wrapping styled unicode.
+        ("<b>𝐡𝐞𝐥𝐥𝐨</b> &amp; <i>𝑤𝑜𝑟𝑙𝑑</i>", "hello & world"),
+        # Zero-width and bidi formatting characters are removed.
+        ("hel​lo", "hello"),
+        ("a‍b﻿c", "abc"),
+    ],
+)
+def test_strip_styling(string: str, expected: str) -> None:
+    """Should strip styling from text."""
+    assert strip_styling(string) == expected
