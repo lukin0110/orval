@@ -275,8 +275,8 @@ def test_truncate(string: str, number: int, suffix: str, expected: str | type[Va
         # Combined: HTML wrapping styled unicode.
         ("<b>𝐡𝐞𝐥𝐥𝐨</b> &amp; <i>𝑤𝑜𝑟𝑙𝑑</i>", "hello & world"),
         # Zero-width and bidi formatting characters are removed.
-        ("hel​lo", "hello"),
-        ("a‍b﻿c", "abc"),
+        ("hel\u200blo", "hello"),
+        ("a\u200db\ufeffc", "abc"),
     ],
 )
 def test_strip_styling(string: str, expected: str) -> None:
