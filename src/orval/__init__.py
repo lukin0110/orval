@@ -6,7 +6,17 @@ from orval.byte_utils import pretty_bytes
 from orval.containers import chunkify, deep_merge, flatten
 from orval.datetimes import utcnow
 from orval.hashing import hashify
-from orval.strings import camel_case, dot_case, kebab_case, pascal_case, slugify, snake_case, train_case, truncate
+from orval.strings import (
+    camel_case,
+    dot_case,
+    kebab_case,
+    pascal_case,
+    slugify,
+    snake_case,
+    strip_styling,
+    train_case,
+    truncate,
+)
 from orval.utils import timing
 
 __version__ = metadata.version(__package__)  # type: ignore[invalid-argument-type]
@@ -22,6 +32,7 @@ __all__ = [
     "pretty_bytes",
     "slugify",
     "snake_case",
+    "strip_styling",
     "timing",
     "train_case",
     "truncate",

@@ -51,6 +51,15 @@ train_case(" content type ")
 # Output: Content-Type
 ```
 
+```python
+# Strip styling (HTML tags, entities, Unicode-styled chars) from copy/pasted text.
+from orval import strip_styling
+strip_styling("<b>𝐡𝐞𝐥𝐥𝐨</b> &amp; <i>𝑤𝑜𝑟𝑙𝑑</i>")
+# Output: hello & world
+strip_styling("𝓯𝓪𝓷𝓬𝔂 café")
+# Output: fancy café
+```
+
 ### Collection utils
 
 ```python
