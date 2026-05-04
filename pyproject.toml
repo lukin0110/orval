@@ -98,6 +98,10 @@ unfixable = ["ERA001", "F401", "F841", "T201", "T203"]  # https://docs.astral.sh
 [tool.ruff.lint.extend-per-file-ignores] # https://docs.astral.sh/ruff/settings/#extend-per-file-ignores
 # Ignore missing __init__.py files in tests.
 "tests/*" = ["INP001", "PLR2004"]
+# strip_styling docstring intentionally shows ambiguous-unicode examples.
+"src/orval/strings.py" = ["RUF002"]
+# strip_styling tests intentionally feed in ambiguous-unicode inputs.
+"tests/test_strings.py" = ["RUF001"]
 
 [tool.ruff.lint.flake8-tidy-imports]
 # Disallow all relative imports.
