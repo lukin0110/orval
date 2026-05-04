@@ -5,29 +5,19 @@ FROM python:$PYTHON_VERSION-slim AS base
 LABEL org.opencontainers.image.description="A Python package that contains a small set of convenient python functions"
 
 # Configure Python to print tracebacks on crash [1], and to not buffer stdout and stderr [2].
+# Activate a virtual environment [3].
 # [1] https://docs.python.org/3/using/cmdline.html#envvar-PYTHONFAULTHANDLER
 # [2] https://docs.python.org/3/using/cmdline.html#envvar-PYTHONUNBUFFERED
-ENV PYTHONFAULTHANDLER=1
-ENV PYTHONUNBUFFERED=1
+# [3] https://docs.astral.sh/uv/concepts/projects/config/#project-environment-path
+ENV PYTHONFAULTHANDLER=1 \
+    PYTHONUNBUFFERED=1 \
+    UV_VERSION=0.10.7 \
+    VIRTUAL_ENV=/opt/venv \
+    PATH=/opt/venv/bin:$PATH \
+    UV_PROJECT_ENVIRONMENT=/opt/venv
 
 # Install uv.
-ENV UV_VERSION=0.10.7
-RUN --mount=type=cache,target=/root/.cache/pip/ \
-    pip install uv==$UV_VERSION
-
-# Install curl & compilers that may be required for certain packages or platforms.
-# The stock ubuntu image cleans up /var/cache/apt automatically. This makes the build process slow.
-# Enable apt caching by removing docker-clean
-RUN rm /etc/apt/apt.conf.d/docker-clean
-RUN --mount=type=cache,target=/var/cache/apt/ \
-    --mount=type=cache,target=/var/lib/apt/ \
-    apt-get update && apt-get install --no-install-recommends --yes curl build-essential
-
-# Create and activate a virtual environment.
-# https://docs.astral.sh/uv/concepts/projects/config/#project-environment-path
-ENV VIRTUAL_ENV=/opt/venv
-ENV PATH=$VIRTUAL_ENV/bin:$PATH
-ENV UV_PROJECT_ENVIRONMENT=$VIRTUAL_ENV
+RUN --mount=type=cache,target=/root/.cache/pip/ pip install --disable-pip-version-check uv==$UV_VERSION
 
 # Set the working directory.
 WORKDIR /workspaces/orval/
@@ -39,11 +29,14 @@ RUN mkdir -p /root/.cache/uv && mkdir -p src/orval/ && touch src/orval/__init__.
 
 FROM base AS dev
 
-# Install DevContainer utilities: zsh, git, docker cli, starship prompt.
+# Install DevContainer utilities: curl, zsh, git, docker cli, starship prompt.
 # Docker: only docker cli is installed and not the entire engine.
+# The stock ubuntu image cleans up /var/cache/apt automatically. This makes the build process slow.
+# Enable apt caching by removing docker-clean
+RUN rm /etc/apt/apt.conf.d/docker-clean
 RUN --mount=type=cache,target=/var/cache/apt/ \
     --mount=type=cache,target=/var/lib/apt/ \
-    apt-get update && apt-get install --yes --no-install-recommends openssh-client git zsh gnupg  && \
+    apt-get update && apt-get install --yes --no-install-recommends curl openssh-client git zsh gnupg  && \
     # Install docker cli (based on https://get.docker.com/)
     install -m 0755 -d /etc/apt/keyrings && \
     curl -fsSL "https://download.docker.com/linux/debian/gpg" | gpg --dearmor --yes -o /etc/apt/keyrings/docker.gpg && \
@@ -54,7 +47,8 @@ RUN --mount=type=cache,target=/var/cache/apt/ \
     # Install starship prompt
     sh -c "$(curl -fsSL https://starship.rs/install.sh)" -- "--yes" && \
     # Mark the workspace as safe for git
-    git config --system --add safe.directory '*'
+    git config --system --add safe.directory '*' && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install the run time Python dependencies in the virtual environment.
 COPY uv.lock* pyproject.toml /workspaces/orval/

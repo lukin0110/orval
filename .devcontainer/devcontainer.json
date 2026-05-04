@@ -12,14 +12,14 @@
   "overrideCommand": true,
   "initializeCommand": "touch ${localWorkspaceFolder}/.env",
   "mounts": [
-    "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,consistency=consistent"
+    "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,consistency=consistent",
+    "type=volume,source=claude-code-config,target=/root/.claude,consistency=cached"
   ],
   "customizations": {
     "vscode": {
       "extensions": [
         "astral-sh.ty",
         "charliermarsh.ruff",
-        "eamodio.gitlens",
         "GitHub.copilot-chat",
         "GitHub.vscode-github-actions",
         "GitHub.vscode-pull-request-github",
@@ -50,7 +50,7 @@
         "[toml]": {
           "editor.formatOnSave": false
         },
-        "python.defaultInterpreterPath": "/opt/orval-env/bin/python",
+        "python.defaultInterpreterPath": "/opt/venv/bin/python",
         "python.terminal.activateEnvironment": false,
         "python.testing.pytestEnabled": true,
         "ruff.importStrategy": "fromEnvironment",

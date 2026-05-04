@@ -11,6 +11,9 @@ services:
     volumes:
       - .:/workspaces/orval/
 
+volumes:
+  claude-code-config:
+
 networks:
   default:
     name: orval-network
