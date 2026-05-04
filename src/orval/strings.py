@@ -10,7 +10,9 @@ import unicodedata
 
 _HTML_TAG_RE = re.compile(r"<[^<>]+>")
 # Zero-width and bidi-formatting characters that often hitchhike with copy/pasted text.
-_ZERO_WIDTH_RE = re.compile("[​-‏‪-‮⁠-⁯﻿]")
+# Covers: ZWSP/ZWNJ/ZWJ + LRM/RLM (U+200B-U+200F), bidi embedding/override controls
+# (U+202A-U+202E), word joiner / invisible operators (U+2060-U+206F), and BOM (U+FEFF).
+_ZERO_WIDTH_RE = re.compile("[\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff]")  # noqa: RUF039
 
 
 def _normalize(string: str, unicode: bool = True, compact_spaces: bool = True) -> str:
@@ -233,6 +235,9 @@ def strip_styling(string: str) -> str:
       Symbols block (bold, italic, script, fraktur, double-struck, monospace,
       etc.) to their plain equivalents.
     - Collapses ligatures and full-width forms (e.g., ``ﬁ`` → ``fi``, ``Ａ`` → ``A``).
+    - Normalizes other Unicode compatibility forms via NFKC (e.g., circled
+      numbers ``①`` → ``1``, Roman numerals ``Ⅷ`` → ``VIII``, superscripts
+      ``²`` → ``2``, fractions ``½`` → ``1/2``).
     - Removes zero-width and bidi-formatting characters.
 
     Diacritics and non-ASCII letters are preserved (e.g., ``café`` stays ``café``).
