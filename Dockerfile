@@ -11,7 +11,7 @@ LABEL org.opencontainers.image.description="A Python package that contains a sma
 # [3] https://docs.astral.sh/uv/concepts/projects/config/#project-environment-path
 ENV PYTHONFAULTHANDLER=1 \
     PYTHONUNBUFFERED=1 \
-    UV_VERSION=0.10.7 \
+    UV_VERSION=0.12.6 \
     VIRTUAL_ENV=/opt/venv \
     PATH=/opt/venv/bin:$PATH \
     UV_PROJECT_ENVIRONMENT=/opt/venv

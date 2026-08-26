@@ -42,4 +42,4 @@ def test_format_bytes_invalid_format() -> None:
 def test_format_bytes_invalid_type() -> None:
     """Should raise a TypeError for invalid type."""
     with pytest.raises(TypeError, match=r"Size must be an integer."):
-        pretty_bytes("1024", precision=2)  # type: ignore[arg-type]
+        pretty_bytes("1024", precision=2)  # ty: ignore[invalid-argument-type]

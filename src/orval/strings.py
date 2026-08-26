@@ -12,7 +12,7 @@ _HTML_TAG_RE = re.compile(r"<[^<>]+>")
 # Zero-width and bidi-formatting characters that often hitchhike with copy/pasted text.
 # Covers: ZWSP/ZWNJ/ZWJ + LRM/RLM (U+200B-U+200F), bidi embedding/override controls
 # (U+202A-U+202E), word joiner / invisible operators (U+2060-U+206F), and BOM (U+FEFF).
-_ZERO_WIDTH_RE = re.compile("[\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff]")  # noqa: RUF039
+_ZERO_WIDTH_RE = re.compile("[\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff]")  # ruff: ignore[unraw-re-pattern]
 
 
 def _normalize(string: str, unicode: bool = True, compact_spaces: bool = True) -> str:

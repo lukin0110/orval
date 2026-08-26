@@ -16,6 +16,7 @@ pip install orval
 ### String utils
 ```python
 from orval import kebab_case
+
 kebab_case("Great Scott")
 # Output: great-scott
 kebab_case("Gréat Scött")
@@ -26,6 +27,7 @@ kebab_case("Gréat Scött")
 # Slightly different from kebab_case. It does not allow Unicode characters.
 # Slugify is well-suited for URL paths or infrastructure resource names (e.g., database names).
 from orval import slugify
+
 slugify("Great scott !! 🤘")
 # Output: great-scott
 slugify("Gréat scött !! 🤘")
@@ -34,12 +36,14 @@ slugify("Gréat scött !! 🤘")
 
 ```python
 from orval import camel_case
+
 camel_case(" Great scott ")
 # Output: greatScott
 ```
 
 ```python
 from orval import snake_case
+
 snake_case(" Great  Scott ")
 # Output: great_scott
 ```
@@ -47,6 +51,7 @@ snake_case(" Great  Scott ")
 ```python
 # Train-Case is well-suited for HTTP headers.
 from orval import train_case
+
 train_case(" content type ")
 # Output: Content-Type
 ```
@@ -54,6 +59,7 @@ train_case(" content type ")
 ```python
 # Strip styling (HTML tags, entities, Unicode-styled chars) from copy/pasted text.
 from orval import strip_styling
+
 strip_styling("<b>𝐡𝐞𝐥𝐥𝐨</b> &amp; <i>𝑤𝑜𝑟𝑙𝑑</i>")
 # Output: hello & world
 strip_styling("𝓯𝓪𝓷𝓬𝔂 café")
@@ -64,12 +70,14 @@ strip_styling("𝓯𝓪𝓷𝓬𝔂 café")
 
 ```python
 from orval import chunkify
+
 chunkify([1, 2, 3, 4, 5, 6], 2)
 # Output: [[1, 2], [3, 4], [5, 6]]
 ```
 
 ```python
 from orval import flatten
+
 list(flatten([[1, 2], [3, [4]]]))
 # Output: [1, 2, 3, 4]
 list(flatten([[1, 2], [3, [4]]], depth=1))
@@ -82,18 +90,24 @@ list(flatten([{1, 2}, [{3}, (4,)]]))
 ```python
 # Hash any Python object.
 from orval import hashify
+
 hashify("great scott")
 # Output: 6617ae826b0b76ba9f3a568a2bbf6c67aec8f575eec69badaf7110091d3f5cc6
 hashify({"great": "scott"})
+
+
 # Output: 1d63b966aa065f76392c3e4a7caa7b1bfce39c889e5faf0df0198b9ff5d0f434
 def marty():
     return "McFly"
+
+
 hashify(marty)
 # Output: f2f21c93c543f023db0ab78ded26bbc5dabb59bb65b0b458b503cdcb0c3389e4
 ```
 
 ```python
 from orval import pretty_bytes
+
 pretty_bytes(1000)
 # Output: 1.00 KB (The "human" decimal format, using base 1000)
 pretty_bytes(1000, "bs")

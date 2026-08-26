@@ -7,7 +7,7 @@ from typing import Any, TypeVar
 T = TypeVar("T")
 
 
-def chunkify(seq: Iterable[T], s: int) -> list[list[T]]:  # noqa: UP047
+def chunkify(seq: Iterable[T], s: int) -> list[list[T]]:  # ruff: ignore[non-pep695-generic-function]
     """Break an interable into chunks of size S.
 
     Parameters
@@ -36,7 +36,7 @@ def chunkify(seq: Iterable[T], s: int) -> list[list[T]]:  # noqa: UP047
     return list(_inner(seq, s))
 
 
-def flatten(seq: Iterable[T], depth: int | None = None) -> Generator[T]:  # noqa: UP047
+def flatten(seq: Iterable[T], depth: int | None = None) -> Generator[T]:  # ruff: ignore[non-pep695-generic-function]
     """Flattens a nested iterable up to a specified depth.
 
     Parameters
@@ -57,7 +57,7 @@ def flatten(seq: Iterable[T], depth: int | None = None) -> Generator[T]:  # noqa
     if not isinstance(seq, Iterable):
         raise TypeError("Input must be an interable (list, set, range, tuple).")
     if isinstance(seq, str):
-        yield seq
+        yield seq  # ty: ignore[invalid-yield]
         return
 
     def _flatten(_seq: Iterable[T], current_depth: int) -> Generator[T]:
