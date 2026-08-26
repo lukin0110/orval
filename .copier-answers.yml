@@ -1,5 +1,5 @@
 # Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
-_commit: v1.1.0-2-g1c79264
+_commit: v1.2.0
 _src_path: git@github.com:lukin0110/uv-copier.git
 ci: github
 description: A Python package that contains a small set of convenient python functions

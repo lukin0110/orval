@@ -19,7 +19,7 @@ from orval.strings import (
 )
 from orval.utils import timing
 
-__version__ = metadata.version(__package__)  # type: ignore[invalid-argument-type]
+__version__ = metadata.version(__package__)  # ty: ignore[invalid-argument-type]
 __all__ = [
     "camel_case",
     "chunkify",

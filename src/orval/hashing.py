@@ -1,7 +1,7 @@
 """Cryptographic hash for any Python object."""
 
 import hashlib
-import pickle  # noqa: S403
+import pickle  # ruff: ignore[suspicious-pickle-import]
 from typing import Any
 
 
@@ -38,5 +38,5 @@ def hashify(obj: Any, alg: str = "sha256") -> str:
         bytes_: bytes = pickle.dumps(obj, protocol=3)
         hasher.update(bytes_)
     if alg in {"shake_128", "shake_256"}:
-        return hasher.hexdigest(length=64)  # type: ignore[call-arg]
+        return hasher.hexdigest(length=64)  # ty: ignore[unknown-argument]
     return hasher.hexdigest()

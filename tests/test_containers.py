@@ -65,7 +65,7 @@ def test_flatten_invalid_depth() -> None:
 def test_flatten_invalid_type() -> None:
     """Should raise a TypeError for invalid type."""
     with pytest.raises(TypeError, match=r"Input must be an interable \(list, set, range, tuple\)\."):
-        list(flatten(1, 1))  # type: ignore[arg-type]
+        list(flatten(1, 1))  # ty: ignore[invalid-argument-type]
 
 
 @pytest.mark.parametrize(
