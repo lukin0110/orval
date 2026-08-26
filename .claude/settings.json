@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(poe test *)",
+      "Bash(poe lint *)",
+      "Bash(git stash *)",
+      "Bash(git checkout *)"
+    ]
+  }
+}
