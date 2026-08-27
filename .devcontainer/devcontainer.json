@@ -10,6 +10,10 @@
   "workspaceFolder": "/workspaces/orval/",
   "remoteUser": "root",
   "overrideCommand": true,
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {}
+  },
   "mounts": [
     "type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock,consistency=consistent",
     "type=volume,source=claude-code-config,target=/root/.claude,consistency=cached"
@@ -17,6 +21,7 @@
   "customizations": {
     "vscode": {
       "extensions": [
+        "anthropic.claude-code",
         "astral-sh.ty",
         "charliermarsh.ruff",
         "GitHub.copilot-chat",
