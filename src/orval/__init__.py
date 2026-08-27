@@ -3,6 +3,7 @@
 from importlib import metadata
 
 from orval.byte_utils import pretty_bytes
+from orval.coercion import safe_float, safe_int, to_bool
 from orval.containers import chunkify, deep_merge, flatten
 from orval.datetimes import utcnow
 from orval.duration_utils import pretty_duration
@@ -32,10 +33,13 @@ __all__ = [
     "pascal_case",
     "pretty_bytes",
     "pretty_duration",
+    "safe_float",
+    "safe_int",
     "slugify",
     "snake_case",
     "strip_styling",
     "timing",
+    "to_bool",
     "train_case",
     "truncate",
     "utcnow",
