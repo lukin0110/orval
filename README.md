@@ -68,7 +68,7 @@ strip_styling("𝓯𝓪𝓷𝓬𝔂 café")
 
 ```python
 # Redact sensitive values (API keys, tokens, card numbers) while keeping a few
-# characters visible. Strings shorter than 'show' are fully masked.
+# characters visible. Strings with 'show' or fewer characters are fully masked.
 from orval import mask
 
 mask("sk-abc123xyz", show=4)
