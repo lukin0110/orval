@@ -66,6 +66,19 @@ strip_styling("𝓯𝓪𝓷𝓬𝔂 café")
 # Output: fancy café
 ```
 
+```python
+# Redact sensitive values (API keys, tokens, card numbers) while keeping a few
+# characters visible. Strings shorter than 'show' are fully masked.
+from orval import mask
+
+mask("sk-abc123xyz", show=4)
+# Output: ********3xyz
+mask("sk-abc123xyz", show=4, side="l")
+# Output: sk-a********
+mask("abc", show=4)
+# Output: ***
+```
+
 ### Collection utils
 
 ```python
@@ -94,12 +107,10 @@ from orval import hashify
 hashify("great scott")
 # Output: 6617ae826b0b76ba9f3a568a2bbf6c67aec8f575eec69badaf7110091d3f5cc6
 hashify({"great": "scott"})
-
-
 # Output: 1d63b966aa065f76392c3e4a7caa7b1bfce39c889e5faf0df0198b9ff5d0f434
+
 def marty():
     return "McFly"
-
 
 hashify(marty)
 # Output: f2f21c93c543f023db0ab78ded26bbc5dabb59bb65b0b458b503cdcb0c3389e4

@@ -1,11 +1,13 @@
 """Tests for the string manipulation functions."""
 
 import pytest
+from typeguard import suppress_type_checks
 
 from orval import (
     camel_case,
     dot_case,
     kebab_case,
+    mask,
     pascal_case,
     slugify,
     snake_case,
@@ -241,6 +243,54 @@ def test_truncate(string: str, number: int, suffix: str, expected: str | type[Va
             truncate(string, number, suffix)
     else:
         assert truncate(string, number, suffix) == expected
+
+
+@pytest.mark.parametrize(
+    ("string", "show", "side", "mask_char", "expected"),
+    [
+        ("secret", 4, "r", "*", "**cret"),
+        ("secret", 4, "l", "*", "secr**"),
+        ("sk-abc123xyz", 4, "r", "*", "********3xyz"),
+        ("sk-abc123xyz", 4, "l", "*", "sk-a********"),
+        ("4111111111111111", 4, "r", "*", "************1111"),
+        ("secret", 2, "r", "#", "####et"),
+        ("secret", 0, "r", "*", "******"),
+        ("secret", 0, "l", "*", "******"),
+    ],
+)
+def test_mask(string: str, show: int, side: str, mask_char: str, expected: str) -> None:
+    """Should mask a string while keeping a few characters visible."""
+    assert mask(string, show=show, side=side, mask_char=mask_char) == expected
+
+
+@pytest.mark.parametrize(
+    ("string", "show", "expected"),
+    [
+        ("abc", 4, "***"),
+        ("abcd", 4, "****"),
+        ("secret", 6, "******"),
+        ("secret", 100, "******"),
+        ("", 4, ""),
+    ],
+)
+def test_mask_short_input(string: str, show: int, expected: str) -> None:
+    """Should fully mask strings that are too short to safely reveal characters."""
+    assert mask(string, show=show) == expected
+
+
+def test_mask_invalid() -> None:
+    """Should raise a ValueError for a negative 'show' or an unrecognized 'side'."""
+    with pytest.raises(ValueError, match=r"Show must be a non-negative integer."):
+        mask("secret", show=-1)
+    with pytest.raises(ValueError, match=r"Side must be one of"):
+        mask("secret", side="x")
+
+
+@suppress_type_checks
+def test_mask_invalid_type() -> None:
+    """Should raise a TypeError when the input is not a string."""
+    with pytest.raises(TypeError, match=r"Value must be a string."):
+        mask(12345)  # ty: ignore[invalid-argument-type]
 
 
 @pytest.mark.parametrize(
