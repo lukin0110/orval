@@ -102,6 +102,10 @@ unfixable = ["commented-out-code", "unused-import", "unused-variable", "print", 
 "src/orval/strings.py" = ["ambiguous-unicode-character-docstring"]
 # strip_styling tests intentionally feed in ambiguous-unicode inputs.
 "tests/test_strings.py" = ["ambiguous-unicode-character-string"]
+# Duration formatting intentionally uses the µ (micro) sign for microseconds.
+"src/orval/duration_utils.py" = ["ambiguous-unicode-character-string"]
+# Duration tests intentionally assert on µs-formatted output.
+"tests/test_duration_utils.py" = ["ambiguous-unicode-character-string"]
 
 [tool.ruff.lint.flake8-tidy-imports]
 # Disallow all relative imports.

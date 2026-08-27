@@ -114,8 +114,21 @@ pretty_bytes(1000, "bs")
 # Output: 1000.00 B (Binary format, using base 1024)
 pretty_bytes(20000000, "dl", precision=0)
 # Output: 20 Megabytes
-pretty_bytes(20000000, "dl", precision=0)
+pretty_bytes(20000000, "bl", precision=0)
 # Output: 19 Mebibytes
+```
+
+```python
+from orval import pretty_duration
+
+pretty_duration(9000)
+# Output: 2h 30m
+pretty_duration(9000, "l")
+# Output: 2 hours 30 minutes
+pretty_duration(93784)
+# Output: 1d 2h 3m 4s
+pretty_duration(0.000042)
+# Output: 42µs
 ```
 
 See all available functions in [\_\_init\_\_.py](src/orval/__init__.py).
