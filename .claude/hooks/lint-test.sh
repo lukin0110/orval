@@ -34,8 +34,9 @@ run_step() {
     output=$("$@" 2>&1)
     status=$?
     if [ "$status" -ne 0 ]; then
-        # Record the state that failed so an unchanged re-stop is not blocked again.
-        printf '%s' "$current" > "$marker"
+        # Record the state that failed so an unchanged re-stop is not blocked
+        # again; recompute since the step may have auto-fixed files.
+        fingerprint > "$marker"
         printf '%s failed (exit %d):\n\n%s\n' "$name" "$status" "$(printf '%s\n' "$output" | tail -n 60)" >&2
         exit 2
     fi
