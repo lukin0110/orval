@@ -284,6 +284,10 @@ def test_mask_invalid() -> None:
         mask("secret", show=-1)
     with pytest.raises(ValueError, match=r"Side must be one of"):
         mask("secret", side="x")
+    with pytest.raises(ValueError, match=r"Mask char must be a single character."):
+        mask("secret", mask_char="")
+    with pytest.raises(ValueError, match=r"Mask char must be a single character."):
+        mask("secret", mask_char="##")
 
 
 @suppress_type_checks

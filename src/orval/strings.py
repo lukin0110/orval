@@ -248,12 +248,13 @@ def mask(string: str, /, show: int = 4, side: str = "r", mask_char: str = "*") -
     Returns
     -------
     str
-        The masked string, e.g. ``"*******3xyz"``.
+        The masked string, e.g. ``"********3xyz"``.
 
     Raises
     ------
     ValueError
-        If 'show' is negative or 'side' is not recognized.
+        If 'show' is negative, 'side' is not recognized, or 'mask_char' is not a
+        single character.
     """
     if not isinstance(string, str):
         raise TypeError("Value must be a string.")
@@ -261,6 +262,8 @@ def mask(string: str, /, show: int = 4, side: str = "r", mask_char: str = "*") -
         raise ValueError("Show must be a non-negative integer.")
     if side not in _SIDES:
         raise ValueError(f"Side must be one of {_SIDES}.")
+    if len(mask_char) != 1:
+        raise ValueError("Mask char must be a single character.")
     if show >= len(string):
         return mask_char * len(string)
     hidden = mask_char * (len(string) - show)
