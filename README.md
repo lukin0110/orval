@@ -119,6 +119,24 @@ pretty_bytes(20000000, "bl", precision=0)
 ```
 
 ```python
+# Coerce loosely-typed input (env vars, query params, config files).
+from orval import safe_float, safe_int, to_bool
+
+to_bool("yes")
+# Output: True
+to_bool("off")
+# Output: False
+safe_int("3.7")
+# Output: 3
+safe_int("oops", default=0)
+# Output: 0
+safe_float("3.14")
+# Output: 3.14
+safe_float(None, default=1.0)
+# Output: 1.0
+```
+
+```python
 from orval import pretty_duration
 
 pretty_duration(9000)
