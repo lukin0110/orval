@@ -13,6 +13,8 @@ _HTML_TAG_RE = re.compile(r"<[^<>]+>")
 # Covers: ZWSP/ZWNJ/ZWJ + LRM/RLM (U+200B-U+200F), bidi embedding/override controls
 # (U+202A-U+202E), word joiner / invisible operators (U+2060-U+206F), and BOM (U+FEFF).
 _ZERO_WIDTH_RE = re.compile("[\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff]")  # ruff: ignore[unraw-re-pattern]
+# Which end of the string stays visible when masking: leading or trailing characters.
+_SIDES: set[str] = {"l", "r"}
 
 
 def _normalize(string: str, unicode: bool = True, compact_spaces: bool = True) -> str:
@@ -221,6 +223,48 @@ def truncate(string: str, number: int, /, suffix: str = "...") -> str:
     if len(string) <= number:
         return string
     return f"{string[: number - 1]}{suffix}"
+
+
+def mask(string: str, /, show: int = 4, side: str = "r", mask_char: str = "*") -> str:
+    """Mask a string, keeping a few characters visible.
+
+    Useful for redacting sensitive values (API keys, tokens, card numbers) while
+    keeping enough characters visible to identify them. The output has the same
+    length as the input. When 'show' is greater than or equal to the length of the
+    string, every character is masked so that a short secret is never revealed.
+
+    Parameters
+    ----------
+    string
+        The string to mask.
+    show
+        Number of characters to leave visible (default is 4).
+    side
+        Which end stays visible. One of "l" (leading), "r" (trailing).
+        Default is "r".
+    mask_char
+        The character used for masking (default is "*").
+
+    Returns
+    -------
+    str
+        The masked string, e.g. ``"*******3xyz"``.
+
+    Raises
+    ------
+    ValueError
+        If 'show' is negative or 'side' is not recognized.
+    """
+    if not isinstance(string, str):
+        raise TypeError("Value must be a string.")
+    if show < 0:
+        raise ValueError("Show must be a non-negative integer.")
+    if side not in _SIDES:
+        raise ValueError(f"Side must be one of {_SIDES}.")
+    if show >= len(string):
+        return mask_char * len(string)
+    hidden = mask_char * (len(string) - show)
+    return string[:show] + hidden if side == "l" else hidden + string[len(string) - show :]
 
 
 def strip_styling(string: str) -> str:
