@@ -105,13 +105,13 @@ def test_safe_int_default(value: object) -> None:
 @pytest.mark.parametrize(
     ("value", "expected"),
     [
-        ("3.14", 3.14),
+        ("3.5", 3.5),
         ("-0.5", -0.5),
         ("  2.5  ", 2.5),
         ("42", 42.0),
         ("1e-3", 0.001),
         (42, 42.0),
-        (3.14, 3.14),
+        (math.pi, math.pi),
         (True, 1.0),
         ("inf", math.inf),
     ],
@@ -128,5 +128,5 @@ def test_safe_float(value: object, expected: float) -> None:
 def test_safe_float_default(value: object) -> None:
     """Should return the default when conversion fails."""
     assert safe_float(value) is None
-    assert safe_float(value, default=0.0) == 0.0
-    assert safe_float(value, default=-1.5) == -1.5
+    assert safe_float(value, default=0.0) == pytest.approx(0.0)
+    assert safe_float(value, default=-1.5) == pytest.approx(-1.5)

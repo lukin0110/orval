@@ -40,7 +40,7 @@ def to_bool(value: object, default: bool | None = None) -> bool:
     """
     if isinstance(value, bool):
         return value
-    if isinstance(value, int | float) and value in (0, 1):
+    if isinstance(value, int | float) and value in {0, 1}:
         return bool(value)
     if isinstance(value, str):
         text = value.strip().lower()
