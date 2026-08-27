@@ -5,6 +5,7 @@ from importlib import metadata
 from orval.byte_utils import pretty_bytes
 from orval.containers import chunkify, deep_merge, flatten
 from orval.datetimes import utcnow
+from orval.duration_utils import pretty_duration
 from orval.hashing import hashify
 from orval.strings import (
     camel_case,
@@ -30,6 +31,7 @@ __all__ = [
     "kebab_case",
     "pascal_case",
     "pretty_bytes",
+    "pretty_duration",
     "slugify",
     "snake_case",
     "strip_styling",
