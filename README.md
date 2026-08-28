@@ -232,6 +232,21 @@ parse_duration("90")
 # Output: 90.0 (a bare number is interpreted as seconds)
 ```
 
+```python
+from orval import pretty_number
+
+pretty_number(1234567)
+# Output: 1.2M
+pretty_number(1234567, "l")
+# Output: 1.2 million
+pretty_number(1234567890)
+# Output: 1.2B
+pretty_number(1234567, precision=2)
+# Output: 1.23M
+pretty_number(999)
+# Output: 999
+```
+
 See all available functions in [\_\_init\_\_.py](src/orval/__init__.py).
 
 ## 🧑‍💻 Contributing

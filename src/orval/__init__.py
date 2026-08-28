@@ -8,6 +8,7 @@ from orval.containers import chunkify, compact, deep_merge, flatten, pick
 from orval.datetimes import utcnow
 from orval.duration_utils import parse_duration, pretty_duration
 from orval.hashing import hashify
+from orval.number_utils import pretty_number
 from orval.strings import (
     camel_case,
     dot_case,
@@ -42,6 +43,7 @@ __all__ = [
     "pick",
     "pretty_bytes",
     "pretty_duration",
+    "pretty_number",
     "safe_float",
     "safe_int",
     "slugify",
