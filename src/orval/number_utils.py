@@ -17,6 +17,18 @@ _UNITS: list[tuple[str, str]] = [
 _FORMATS: set[str] = {"s", "l"}
 
 
+def _validate_arguments(value: float, fmt: str, precision: int) -> None:
+    """Validate pretty_number arguments, raising TypeError or ValueError."""
+    if not isinstance(value, int | float):
+        raise TypeError("Value must be a number.")
+    if fmt not in _FORMATS:
+        raise ValueError(f"Format must be one of {_FORMATS}.\n  s: short (e.g. 1.2M)\n  l: long (e.g. 1.2 million)")
+    if not isinstance(precision, int):
+        raise TypeError("Precision must be an integer.")
+    if precision < 0:
+        raise ValueError("Precision must be a non-negative integer.")
+
+
 def pretty_number(value: float, fmt: str = "s", /, precision: int = 1) -> str:
     """Convert a number to a compact human-readable string.
 
@@ -43,14 +55,7 @@ def pretty_number(value: float, fmt: str = "s", /, precision: int = 1) -> str:
     str
         The formatted number as a human-readable string.
     """
-    if not isinstance(value, int | float):
-        raise TypeError("Value must be a number.")
-    if fmt not in _FORMATS:
-        raise ValueError(f"Format must be one of {_FORMATS}.\n  s: short (e.g. 1.2M)\n  l: long (e.g. 1.2 million)")
-    if not isinstance(precision, int):
-        raise TypeError("Precision must be an integer.")
-    if precision < 0:
-        raise ValueError("Precision must be a non-negative integer.")
+    _validate_arguments(value, fmt, precision)
     sign = "-" if value < 0 else ""
     try:
         scaled: float = float(abs(value))
@@ -70,6 +75,9 @@ def pretty_number(value: float, fmt: str = "s", /, precision: int = 1) -> str:
     number = f"{scaled:.{precision}f}"
     if "." in number:
         number = number.rstrip("0").rstrip(".")
+    if number == "0":
+        # A negative value that rounds to zero must not render as "-0".
+        sign = ""
     unit = _UNITS[index][0] if fmt == "s" else _UNITS[index][1]
     separator = " " if fmt == "l" and unit else ""
     return f"{sign}{number}{separator}{unit}"
