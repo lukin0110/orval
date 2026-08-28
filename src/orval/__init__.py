@@ -6,7 +6,7 @@ from orval.byte_utils import parse_bytes, pretty_bytes
 from orval.coercion import safe_float, safe_int, to_bool
 from orval.containers import chunkify, deep_merge, flatten, pick
 from orval.datetimes import utcnow
-from orval.duration_utils import pretty_duration
+from orval.duration_utils import parse_duration, pretty_duration
 from orval.hashing import hashify
 from orval.strings import (
     camel_case,
@@ -34,6 +34,7 @@ __all__ = [
     "kebab_case",
     "mask",
     "parse_bytes",
+    "parse_duration",
     "pascal_case",
     "pick",
     "pretty_bytes",
