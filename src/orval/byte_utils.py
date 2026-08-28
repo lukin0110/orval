@@ -1,5 +1,7 @@
 """Utility functions for working with bytes."""
 
+import re
+
 _BASE_1000: int = 1000
 _BASE_1024: int = 1024
 
@@ -33,6 +35,24 @@ _UNITS_BINARY_LONG: list[str] = [
 
 # decimal-short, decimal-long, binary-short, binary-long
 _FORMATS: set[str] = {"ds", "dl", "bs", "bl"}
+
+_PARSE_PATTERN: re.Pattern[str] = re.compile(r"^(?P<number>-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)\s*(?P<unit>[A-Za-z]*)$")
+
+
+def _build_unit_multipliers() -> dict[str, int]:
+    multipliers: dict[str, int] = {}
+    for units, base in (
+        (_UNITS_DECIMAL_SHORT, _BASE_1000),
+        (_UNITS_DECIMAL_LONG, _BASE_1000),
+        (_UNITS_BINARY_SHORT, _BASE_1024),
+        (_UNITS_BINARY_LONG, _BASE_1024),
+    ):
+        for exponent, unit in enumerate(units):
+            multipliers[unit.lower()] = base**exponent
+    return multipliers
+
+
+_UNIT_MULTIPLIERS: dict[str, int] = _build_unit_multipliers()
 
 
 def pretty_bytes(size: int, fmt: str = "ds", /, precision: int = 2) -> str:
@@ -81,3 +101,44 @@ def pretty_bytes(size: int, fmt: str = "ds", /, precision: int = 2) -> str:
         size_ /= base
         index += 1
     return f"{size_:.{precision}f} {units[index]}"
+
+
+def parse_bytes(text: str, /) -> int:
+    """Parse a human-readable byte size string into an integer number of bytes.
+
+    The inverse of pretty_bytes. Accepts a number followed by an optional unit, e.g.
+    "1.5 GiB" (1610612736), "1.54 KB" (1540) or "20 Megabytes" (20000000). Unit matching
+    is case-insensitive and recognizes both decimal units (KB, Kilobytes, base 1000) and
+    binary units (KiB, Kibibytes, base 1024). A bare number is interpreted as bytes.
+    The result is rounded to the nearest integer.
+
+    Parameters
+    ----------
+    text : str
+        The human-readable size, e.g. "1.5 GiB".
+
+    Returns
+    -------
+    int
+        The size in bytes.
+
+    Raises
+    ------
+    TypeError
+        If text is not a string.
+    ValueError
+        If text cannot be parsed, the number is negative, or the unit is unknown.
+    """
+    if not isinstance(text, str):
+        raise TypeError("Text must be a string.")
+    match = _PARSE_PATTERN.match(text.strip())
+    if not match:
+        raise ValueError(f"Cannot parse {text!r} as a byte size.")
+    number = float(match.group("number"))
+    if number < 0:
+        raise ValueError("Size must be non-negative.")
+    unit = match.group("unit")
+    multiplier = _UNIT_MULTIPLIERS.get(unit.lower(), 0) if unit else 1
+    if not multiplier:
+        raise ValueError(f"Unknown byte unit: {unit!r}.")
+    return round(number * multiplier)

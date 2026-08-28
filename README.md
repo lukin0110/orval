@@ -149,6 +149,19 @@ pretty_bytes(20000000, "bl", precision=0)
 ```
 
 ```python
+from orval import parse_bytes
+
+parse_bytes("1.5 GiB")
+# Output: 1610612736
+parse_bytes("1.54 KB")
+# Output: 1540
+parse_bytes("20 Megabytes")
+# Output: 20000000
+parse_bytes("512")
+# Output: 512 (a bare number is interpreted as bytes)
+```
+
+```python
 # Coerce loosely-typed input (env vars, query params, config files).
 from orval import safe_float, safe_int, to_bool
 

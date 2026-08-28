@@ -2,7 +2,7 @@
 
 from importlib import metadata
 
-from orval.byte_utils import pretty_bytes
+from orval.byte_utils import parse_bytes, pretty_bytes
 from orval.coercion import safe_float, safe_int, to_bool
 from orval.containers import chunkify, deep_merge, flatten, pick
 from orval.datetimes import utcnow
@@ -33,6 +33,7 @@ __all__ = [
     "hashify",
     "kebab_case",
     "mask",
+    "parse_bytes",
     "pascal_case",
     "pick",
     "pretty_bytes",
