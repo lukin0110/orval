@@ -192,6 +192,20 @@ pretty_duration(0.000042)
 # Output: 42µs
 ```
 
+```python
+# The inverse of pretty_duration.
+from orval import parse_duration
+
+parse_duration("1h30m")
+# Output: 5400.0
+parse_duration("2 hours 30 minutes")
+# Output: 9000.0
+parse_duration("250ms")
+# Output: 0.25
+parse_duration("90")
+# Output: 90.0 (a bare number is interpreted as seconds)
+```
+
 See all available functions in [\_\_init\_\_.py](src/orval/__init__.py).
 
 ## 🧑‍💻 Contributing
