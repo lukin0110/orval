@@ -77,6 +77,39 @@ def flatten(seq: Iterable[T], depth: int | None = None) -> Generator[T]:  # ruff
     yield from _flatten(seq, 0)
 
 
+def compact(seq: Iterable[T], *, none_only: bool = False) -> list[T]:  # ruff: ignore[non-pep695-generic-function]
+    """Remove falsy values from an iterable.
+
+    By default all falsy values are removed: ``None``, ``False``, ``0``, ``""``, empty
+    collections, etc. With ``none_only=True`` only ``None`` values are removed, keeping
+    legitimate falsy values such as ``0`` or ``""``.
+
+    Parameters
+    ----------
+    seq : Iterable
+        The iterable to compact.
+    none_only : bool, optional
+        If True, only remove ``None`` values instead of all falsy values.
+
+    Returns
+    -------
+    list
+        A new list without the removed values.
+
+    Examples
+    --------
+    >>> compact([0, 1, None, 2, False, 3, ""])
+    [1, 2, 3]
+    >>> compact([0, 1, None, 2, False, 3, ""], none_only=True)
+    [0, 1, 2, False, 3, '']
+    """
+    if not isinstance(seq, Iterable) or isinstance(seq, str):
+        raise TypeError("Input must be an iterable (list, set, range, tuple).")
+    if none_only:
+        return [item for item in seq if item is not None]
+    return [item for item in seq if item]
+
+
 def deep_merge(*dicts: dict[Any, Any]) -> dict[Any, Any]:
     """Deep merge multiple dictionaries.
 

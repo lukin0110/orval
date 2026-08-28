@@ -7,7 +7,7 @@ from typing import Any
 import pytest
 from typeguard import suppress_type_checks
 
-from orval import chunkify, deep_merge, flatten, pick
+from orval import chunkify, compact, deep_merge, flatten, pick
 
 
 @pytest.mark.parametrize(
@@ -67,6 +67,45 @@ def test_flatten_invalid_type() -> None:
     """Should raise a TypeError for invalid type."""
     with pytest.raises(TypeError, match=r"Input must be an interable \(list, set, range, tuple\)\."):
         list(flatten(1, 1))  # ty: ignore[invalid-argument-type]
+
+
+@pytest.mark.parametrize(
+    ("sequence", "expected"),
+    [
+        ([0, 1, None, 2, False, 3, ""], [1, 2, 3]),  # Mixed falsy values
+        ([1, 2, 3], [1, 2, 3]),  # Nothing to remove
+        ([None, False, 0, "", [], {}, ()], []),  # Only falsy values
+        ([], []),  # Empty list
+        ((0, "a", None), ["a"]),  # Tuple
+        (range(3), [1, 2]),  # Range
+        ([[1], [], [2]], [[1], [2]]),  # Nested empty containers
+    ],
+)
+def test_compact(sequence: Iterable[Any], expected: list[Any]) -> None:
+    """Should remove all falsy values."""
+    assert compact(sequence) == expected
+
+
+@pytest.mark.parametrize(
+    ("sequence", "expected"),
+    [
+        ([0, 1, None, 2, False, 3, ""], [0, 1, 2, False, 3, ""]),  # Keep falsy, drop None
+        ([None, None], []),  # Only None values
+        ([0, "", False], [0, "", False]),  # Falsy but not None
+        ([], []),  # Empty list
+    ],
+)
+def test_compact_none_only(sequence: Iterable[Any], expected: list[Any]) -> None:
+    """Should remove only None values."""
+    assert compact(sequence, none_only=True) == expected
+
+
+@suppress_type_checks
+@pytest.mark.parametrize("sequence", [1, "abc"])
+def test_compact_invalid_type(sequence: Any) -> None:
+    """Should raise a TypeError for non-iterable or string input."""
+    with pytest.raises(TypeError, match=r"Input must be an iterable \(list, set, range, tuple\)\."):
+        compact(sequence)
 
 
 @pytest.mark.parametrize(

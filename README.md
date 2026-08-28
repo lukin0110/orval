@@ -110,6 +110,16 @@ list(flatten([{1, 2}, [{3}, (4,)]]))
 ```
 
 ```python
+# Drop falsy values, or only None values, from an iterable.
+from orval import compact
+
+compact([0, 1, None, 2, False, 3, ""])
+# Output: [1, 2, 3]
+compact([0, 1, None, 2, False, 3, ""], none_only=True)
+# Output: [0, 1, 2, False, 3, '']
+```
+
+```python
 from orval import pick
 
 pick({"a": {"b": [1, 2, 3], "c": 4}, "d": 5}, "a.b[0]", "d")
