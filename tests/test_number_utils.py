@@ -51,6 +51,13 @@ def test_pretty_number_non_finite(value: float) -> None:
         pretty_number(value)
 
 
+@pytest.mark.parametrize("value", [10**400, -(10**400)])
+def test_pretty_number_overflowing_int(value: int) -> None:
+    """Should raise a ValueError for an integer beyond the float range."""
+    with pytest.raises(ValueError, match=r"Value is too large to format."):
+        pretty_number(value)
+
+
 @suppress_type_checks
 def test_pretty_number_invalid_type() -> None:
     """Should raise a TypeError for invalid type."""

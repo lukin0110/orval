@@ -45,12 +45,16 @@ def pretty_number(value: float, fmt: str = "s", /, precision: int = 1) -> str:
     """
     if not isinstance(value, int | float):
         raise TypeError("Value must be a number.")
-    if isinstance(value, float) and not math.isfinite(value):
-        raise ValueError("Value must be finite.")
     if fmt not in _FORMATS:
         raise ValueError(f"Format must be one of {_FORMATS}.\n  s: short (e.g. 1.2M)\n  l: long (e.g. 1.2 million)")
     sign = "-" if value < 0 else ""
-    scaled: float = float(abs(value))
+    try:
+        scaled: float = float(abs(value))
+    except OverflowError:
+        # Integers beyond the float range (~1.8e308) cannot be scaled.
+        raise ValueError("Value is too large to format.") from None
+    if not math.isfinite(scaled):
+        raise ValueError("Value must be finite.")
     index = 0
     while scaled >= _BASE and index < len(_UNITS) - 1:
         scaled /= _BASE
