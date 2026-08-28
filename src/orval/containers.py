@@ -126,8 +126,8 @@ def pick(data: dict[str, Any], /, *paths: str) -> dict[str, Any]:
 
     Paths use dot notation for dictionary keys and brackets for list indices, e.g. "a.b[0].c".
     Bracket indices may be negative and appear as integer keys in the result. Paths that do not
-    resolve are silently skipped. Overlapping paths are deep-merged. Picked values are references
-    to the originals, not copies.
+    resolve are silently skipped. The result is a newly built structure and overlapping paths are
+    deep-merged into new dictionaries, but the picked leaf values themselves are not copied.
 
     Parameters
     ----------
