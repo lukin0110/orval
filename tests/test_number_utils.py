@@ -51,6 +51,19 @@ def test_pretty_number_non_finite(value: float) -> None:
         pretty_number(value)
 
 
+def test_pretty_number_negative_precision() -> None:
+    """Should raise a ValueError for a negative precision."""
+    with pytest.raises(ValueError, match=r"Precision must be a non-negative integer."):
+        pretty_number(1234567, precision=-1)
+
+
+@suppress_type_checks
+def test_pretty_number_invalid_precision_type() -> None:
+    """Should raise a TypeError for a non-integer precision."""
+    with pytest.raises(TypeError, match=r"Precision must be an integer."):
+        pretty_number(1234567, precision=1.5)  # ty: ignore[invalid-argument-type]
+
+
 @pytest.mark.parametrize("value", [10**400, -(10**400)])
 def test_pretty_number_overflowing_int(value: int) -> None:
     """Should raise a ValueError for an integer beyond the float range."""
