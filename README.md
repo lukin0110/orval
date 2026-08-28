@@ -67,6 +67,16 @@ strip_styling("𝓯𝓪𝓷𝓬𝔂 café")
 ```
 
 ```python
+# Remove accents/diacritics while preserving non-Latin scripts.
+from orval import strip_accents
+
+strip_accents("Héllo Wörld")
+# Output: Hello World
+strip_accents("café こんにちは")
+# Output: cafe こんにちは
+```
+
+```python
 # Redact sensitive values (API keys, tokens, card numbers) while keeping a few
 # characters visible. Strings with 'show' or fewer characters are fully masked.
 from orval import mask

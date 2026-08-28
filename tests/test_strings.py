@@ -11,6 +11,7 @@ from orval import (
     pascal_case,
     slugify,
     snake_case,
+    strip_accents,
     strip_styling,
     train_case,
     truncate,
@@ -295,6 +296,32 @@ def test_mask_invalid_type() -> None:
     """Should raise a TypeError when the input is not a string."""
     with pytest.raises(TypeError, match=r"Value must be a string."):
         mask(12345)  # ty: ignore[invalid-argument-type]
+
+
+@pytest.mark.parametrize(
+    ("string", "expected"),
+    [
+        ("hello", "hello"),
+        ("", ""),
+        ("café", "cafe"),
+        ("Héllo Wörld", "Hello World"),
+        ("naïve façade", "naive facade"),
+        ("Ĝis reĝis, ĉu ŝanĝiĝis?", "Gis regis, cu sangigis?"),
+        # Decomposed input ('e' followed by a combining acute accent).
+        ("cafe\u0301", "cafe"),
+        # Non-Latin scripts are preserved, unlike 'slugify'.
+        ("こんにちは世界", "こんにちは世界"),
+        ("한글", "한글"),
+        ("Ελλάδα", "Ελλαδα"),
+        # Letters without a decomposition pass through unchanged.
+        ("øß", "øß"),
+        # NFKD also folds compatibility characters such as ligatures.
+        ("ﬁre", "fire"),
+    ],
+)
+def test_strip_accents(string: str, expected: str) -> None:
+    """Should strip accents from a string while preserving non-Latin scripts."""
+    assert strip_accents(string) == expected
 
 
 @pytest.mark.parametrize(

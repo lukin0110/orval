@@ -270,6 +270,29 @@ def mask(string: str, /, show: int = 4, side: str = "r", mask_char: str = "*") -
     return string[:show] + hidden if side == "l" else hidden + string[len(string) - show :]
 
 
+def strip_accents(string: str) -> str:
+    """Strip accents (diacritical marks) from a string.
+
+    Decomposes characters (NFKD), removes combining marks, and recomposes (NFC).
+    E.g. 'café' becomes 'cafe' and 'Héllo Wörld' becomes 'Hello World'. Unlike
+    'slugify', non-Latin scripts are preserved: 'こんにちは' stays 'こんにちは'.
+    Letters without a decomposition (e.g. 'ø', 'ß') are left unchanged.
+
+    Parameters
+    ----------
+    string
+        Input string to strip accents from.
+
+    Returns
+    -------
+    str
+        The string with diacritical marks removed.
+    """
+    decomposed = unicodedata.normalize("NFKD", string)
+    stripped = "".join(char for char in decomposed if not unicodedata.combining(char))
+    return unicodedata.normalize("NFC", stripped)
+
+
 def strip_styling(string: str) -> str:
     """Strip styling from text to obtain plain text.
 
