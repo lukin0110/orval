@@ -109,6 +109,15 @@ list(flatten([{1, 2}, [{3}, (4,)]]))
 # Output: [1, 2, 3, 4]
 ```
 
+```python
+from orval import pick
+
+pick({"a": {"b": [1, 2, 3], "c": 4}, "d": 5}, "a.b[0]", "d")
+# Output: {'a': {'b': {0: 1}}, 'd': 5}
+pick({"a": {"b": 1, "c": 2}}, "a.c", "a.x")
+# Output: {'a': {'c': 2}}
+```
+
 ### Misc utils
 ```python
 # Hash any Python object.
