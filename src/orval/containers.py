@@ -3,7 +3,7 @@
 import re
 from collections.abc import Generator, Iterable
 from itertools import islice
-from typing import Any, TypeVar
+from typing import Any, TypeVar, cast
 
 T = TypeVar("T")
 _PATH_RE = re.compile(r"[^.\[\]]+(?:\[-?\d+\])*(?:\.[^.\[\]]+(?:\[-?\d+\])*)*")
@@ -75,6 +75,44 @@ def flatten(seq: Iterable[T], depth: int | None = None) -> Generator[T]:  # ruff
                 yield item
 
     yield from _flatten(seq, 0)
+
+
+def compact(*seq: T | Iterable[T], none_only: bool = True) -> list[T]:  # ruff: ignore[non-pep695-generic-function]
+    """Remove None or falsy values from an iterable or from the given arguments.
+
+    Accepts either a single iterable (``compact([0, 1, None])``) or multiple values
+    (``compact(0, 1, None)``). By default only ``None`` values are removed, keeping
+    legitimate falsy values such as ``0`` or ``""``. With ``none_only=False`` all falsy
+    values are removed: ``None``, ``False``, ``0``, ``""``, empty collections, etc.
+    A single string or bytes argument is treated as one value, not iterated.
+
+    Parameters
+    ----------
+    *seq
+        A single iterable to compact, or multiple values to compact.
+    none_only : bool, optional
+        If True (the default), only remove ``None`` values instead of all falsy values.
+
+    Returns
+    -------
+    list
+        A new list without the removed values.
+
+    Examples
+    --------
+    >>> compact([0, 1, None, 2, False, 3, ""])
+    [0, 1, 2, False, 3, '']
+    >>> compact(0, 1, None, 2)
+    [0, 1, 2]
+    >>> compact([0, 1, None, 2, False, 3, ""], none_only=False)
+    [1, 2, 3]
+    """
+    items: Iterable[T] = cast("Iterable[T]", seq)
+    if len(seq) == 1 and isinstance(seq[0], Iterable) and not isinstance(seq[0], str | bytes):
+        items = cast("Iterable[T]", seq[0])
+    if none_only:
+        return [item for item in items if item is not None]
+    return [item for item in items if item]
 
 
 def deep_merge(*dicts: dict[Any, Any]) -> dict[Any, Any]:
