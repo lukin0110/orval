@@ -21,12 +21,14 @@ from orval.strings import (
     train_case,
     truncate,
 )
-from orval.utils import timing
+from orval.utils import coalesce, coalesce_lazy, timing
 
 __version__ = metadata.version(__package__)  # ty: ignore[invalid-argument-type]
 __all__ = [
     "camel_case",
     "chunkify",
+    "coalesce",
+    "coalesce_lazy",
     "compact",
     "deep_merge",
     "dot_case",
