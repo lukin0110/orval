@@ -222,23 +222,22 @@ def _drop(current: Any, keys: list[str | int]) -> Any:
 
     Returns the input unchanged when the path does not resolve.
     """
-    key, rest = keys[0], keys[1:]
+    key: Any = keys[0]
+    rest = keys[1:]
     if isinstance(current, list) and isinstance(key, int):
         if not -len(current) <= key < len(current):
             return current
-        elements: list[Any] = list(current)
-        if rest:
-            elements[key] = _drop(elements[key], rest)
-        else:
-            del elements[key]
-        return elements
-    if not isinstance(current, dict) or key not in current:
+    elif not isinstance(current, dict) or key not in current:
         return current
-    items: dict[Any, Any] = dict(current)
     if rest:
-        items[key] = _drop(items[key], rest)
-    else:
-        del items[key]
+        child = _drop(current[key], rest)
+        if child is current[key]:
+            return current
+        items: Any = list(current) if isinstance(current, list) else dict(current)
+        items[key] = child
+        return items
+    items = list(current) if isinstance(current, list) else dict(current)
+    del items[key]
     return items
 
 

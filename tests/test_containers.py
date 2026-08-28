@@ -232,6 +232,15 @@ def test_omit_does_not_mutate_input() -> None:
     assert result["d"] is not data["d"]
 
 
+def test_omit_shares_untouched_subtrees() -> None:
+    """Should not copy containers when the path does not resolve."""
+    data = {"a": {"b": 1}, "c": [1, 2]}
+    result = omit(data, "a.x", "a.b.c", "c[5]")
+    assert result == data
+    assert result["a"] is data["a"]
+    assert result["c"] is data["c"]
+
+
 def test_omit_invalid_path() -> None:
     """Should raise a ValueError for a malformed path."""
     with pytest.raises(ValueError, match=re.escape("Invalid path: 'a..b'")):
