@@ -104,7 +104,7 @@ def test_compact_none_only(sequence: Iterable[Any], expected: list[Any]) -> None
 @pytest.mark.parametrize("sequence", [1, "abc"])
 def test_compact_invalid_type(sequence: Any) -> None:
     """Should raise a TypeError for non-iterable or string input."""
-    with pytest.raises(TypeError, match=r"Input must be an iterable \(list, set, range, tuple\)\."):
+    with pytest.raises(TypeError, match=r"Input must be a non-string iterable \(list, set, range, tuple\)\."):
         compact(sequence)
 
 

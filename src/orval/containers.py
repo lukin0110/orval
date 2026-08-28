@@ -87,7 +87,8 @@ def compact(seq: Iterable[T], *, none_only: bool = False) -> list[T]:  # ruff: i
     Parameters
     ----------
     seq : Iterable
-        The iterable to compact.
+        The iterable to compact. Strings are rejected: they are technically iterable,
+        but compacting one character by character is almost certainly a mistake.
     none_only : bool, optional
         If True, only remove ``None`` values instead of all falsy values.
 
@@ -95,6 +96,11 @@ def compact(seq: Iterable[T], *, none_only: bool = False) -> list[T]:  # ruff: i
     -------
     list
         A new list without the removed values.
+
+    Raises
+    ------
+    TypeError
+        If the input is a string or not an iterable.
 
     Examples
     --------
@@ -104,7 +110,7 @@ def compact(seq: Iterable[T], *, none_only: bool = False) -> list[T]:  # ruff: i
     [0, 1, 2, False, 3, '']
     """
     if not isinstance(seq, Iterable) or isinstance(seq, str):
-        raise TypeError("Input must be an iterable (list, set, range, tuple).")
+        raise TypeError("Input must be a non-string iterable (list, set, range, tuple).")
     if none_only:
         return [item for item in seq if item is not None]
     return [item for item in seq if item]
