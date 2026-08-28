@@ -22,17 +22,16 @@ def test_coalesce_keeps_falsy_values() -> None:
 
 
 def test_coalesce_all_none() -> None:
-    """Should return None when all values are None and no default is given."""
+    """Should return None when all values are None."""
     assert coalesce() is None
     assert coalesce(None) is None
     assert coalesce(None, None, None) is None
 
 
-def test_coalesce_default() -> None:
-    """Should return the default only when all values are None."""
-    assert coalesce(None, None, default=8080) == 8080
-    assert coalesce(None, 3000, default=8080) == 3000
-    assert coalesce(default=8080) == 8080
+def test_coalesce_fallback_as_last_argument() -> None:
+    """Should return a constant fallback passed as the last argument only when needed."""
+    assert coalesce(None, None, 8080) == 8080
+    assert coalesce(None, 3000, 8080) == 3000
 
 
 def test_coalesce_lazy_returns_first_non_none() -> None:
@@ -57,10 +56,10 @@ def test_coalesce_lazy_short_circuits() -> None:
 
 
 def test_coalesce_lazy_all_none() -> None:
-    """Should return the default when all callables return None."""
+    """Should return None when all callables return None."""
     assert coalesce_lazy() is None
     assert coalesce_lazy(lambda: None, lambda: None) is None
-    assert coalesce_lazy(lambda: None, default=8080) == 8080
+    assert coalesce_lazy(lambda: None, lambda: 8080) == 8080
 
 
 def test_coalesce_lazy_propagates_errors() -> None:

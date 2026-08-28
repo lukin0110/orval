@@ -186,7 +186,7 @@ from orval import coalesce, coalesce_lazy
 
 coalesce(None, None, 0, 5)
 # Output: 0
-coalesce(None, None, default=8080)
+coalesce(None, None, 8080)
 # Output: 8080
 
 # The lazy variant takes callables, so expensive fallbacks only run when needed.
