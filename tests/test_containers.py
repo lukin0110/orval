@@ -108,6 +108,7 @@ def test_deep_merge_invalid_input(invalid_input: list[Any]) -> None:
         ({"a": [10, 20, 30]}, "a[-1]", None, 30),  # Negative index
         ({"a": [[1, 2], [3]]}, "a[0][1]", None, 2),  # Chained indices
         ({"a": {"0": 1}}, "a.0", None, 1),  # Bare numeric segment is a dict key
+        ({"a": {0: 1}}, "a[0]", None, 1),  # Bracket index resolves an integer dict key, like pick output
         ({"a": {"b": None}}, "a.b", 42, None),  # Explicit None beats the default
         ({"a": {"b": 1}}, "a.x", None, None),  # Missing key -> default None
         ({"a": {"b": 1}}, "a.x", 42, 42),  # Missing key -> custom default
@@ -153,6 +154,7 @@ def test_deep_get_invalid_type() -> None:
         ({"a": [[1, 2]]}, "a[0][1]", 9, {"a": [[1, 9]]}),  # Chained indices
         ({}, "a[0].b", 1, {"a": {0: {"b": 1}}}),  # Missing list -> integer dict key, like pick
         ({"a": (1, 2)}, "a[0]", 9, {"a": {0: 9}}),  # Tuples are not indexable, replaced
+        ({"a": {0: 1}}, "a[0]", 9, {"a": {0: 9}}),  # Bracket index overwrites an integer dict key
     ],
 )
 def test_deep_set(data: dict[str, Any], path: str, value: Any, expected: dict[str, Any]) -> None:
@@ -204,6 +206,7 @@ def test_deep_set_invalid_type() -> None:
         ({"a": [[1, 2], [3]]}, ("a[0][1]",), {"a": [[1], [3]]}),  # Chained indices
         ({"a": [10, 20, 30]}, ("a[0]", "a[1]"), {"a": [20]}),  # Paths applied in order
         ({"a": {"0": 1}, "b": 2}, ("a.0",), {"a": {}, "b": 2}),  # Bare numeric segment is a dict key
+        ({"a": {0: 1, 1: 2}}, ("a[0]",), {"a": {1: 2}}),  # Bracket index removes an integer dict key
         ({"a": {"b": 1}}, ("a.x",), {"a": {"b": 1}}),  # Missing key ignored
         ({"a": {"b": 1}}, ("x.y",), {"a": {"b": 1}}),  # Missing top-level key ignored
         ({"a": [1]}, ("a[5]",), {"a": [1]}),  # Index out of range ignored
@@ -254,6 +257,7 @@ def test_omit_invalid_type() -> None:
         ({"a": [10, 20, 30]}, ("a[-1]",), {"a": {-1: 30}}),  # Negative index
         ({"a": [[1, 2], [3]]}, ("a[0][1]",), {"a": {0: {1: 2}}}),  # Chained indices
         ({"a": {"0": 1}, "b": [9]}, ("a.0",), {"a": {"0": 1}}),  # Bare numeric segment is a dict key
+        ({"a": {0: 1}}, ("a[0]",), {"a": {0: 1}}),  # Bracket index resolves an integer dict key
         ({"a": {"b": 1}}, ("a.x",), {}),  # Missing key skipped
         ({"a": {"b": 1}}, ("x.y",), {}),  # Missing top-level key skipped
         ({"a": [1]}, ("a[5]",), {}),  # Index out of range skipped
@@ -269,6 +273,14 @@ def test_omit_invalid_type() -> None:
 def test_pick(data: dict[str, Any], paths: tuple[str, ...], expected: dict[str, Any]) -> None:
     """Should return a new dictionary containing only the picked paths."""
     assert pick(data, *paths) == expected
+
+
+def test_pick_round_trip() -> None:
+    """Paths picked into integer dict keys should resolve with deep_get and omit again."""
+    picked = pick({"a": [{"b": 1}, {"b": 2}]}, "a[1].b")
+    assert picked == {"a": {1: {"b": 2}}}
+    assert deep_get(picked, "a[1].b") == 2
+    assert omit(picked, "a[1].b") == {"a": {1: {}}}
 
 
 def test_pick_does_not_mutate_input() -> None:

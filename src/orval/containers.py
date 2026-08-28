@@ -109,13 +109,17 @@ def _parse_path(path: str) -> list[str | int]:
 
 
 def _resolve(data: dict[Any, Any], keys: list[str | int]) -> Any:
-    """Walk the keys through nested dicts/lists, returning the value or the _MISSING sentinel."""
+    """Walk the keys through nested dicts/lists, returning the value or the _MISSING sentinel.
+
+    A bracket index (int key) resolves a list position, or an integer dictionary key when the
+    container is a dictionary, as produced by pick and deep_set.
+    """
     current: Any = data
     for key in keys:
-        if isinstance(key, str):
-            if not isinstance(current, dict) or key not in current:
+        if isinstance(current, list) and isinstance(key, int):
+            if not -len(current) <= key < len(current):
                 return _MISSING
-        elif not isinstance(current, list) or not -len(current) <= key < len(current):
+        elif not isinstance(current, dict) or key not in current:
             return _MISSING
         current = current[key]
     return current
@@ -125,7 +129,8 @@ def deep_get(data: dict[str, Any], /, path: str, default: Any = None) -> Any:
     """Get a value from a nested dictionary by path, returning a default if the path does not resolve.
 
     Paths use dot notation for dictionary keys and brackets for list indices, e.g. "a.b[0].c".
-    Bracket indices may be negative.
+    Bracket indices may be negative. A bracket index resolves a list position, or an integer
+    dictionary key when the container is a dictionary, as produced by pick and deep_set.
 
     Parameters
     ----------
@@ -218,23 +223,23 @@ def _drop(current: Any, keys: list[str | int]) -> Any:
     Returns the input unchanged when the path does not resolve.
     """
     key, rest = keys[0], keys[1:]
-    if isinstance(key, str):
-        if not isinstance(current, dict) or key not in current:
+    if isinstance(current, list) and isinstance(key, int):
+        if not -len(current) <= key < len(current):
             return current
-        items: dict[Any, Any] = dict(current)
+        elements: list[Any] = list(current)
         if rest:
-            items[key] = _drop(items[key], rest)
+            elements[key] = _drop(elements[key], rest)
         else:
-            del items[key]
-        return items
-    if not isinstance(current, list) or not -len(current) <= key < len(current):
+            del elements[key]
+        return elements
+    if not isinstance(current, dict) or key not in current:
         return current
-    elements: list[Any] = list(current)
+    items: dict[Any, Any] = dict(current)
     if rest:
-        elements[key] = _drop(elements[key], rest)
+        items[key] = _drop(items[key], rest)
     else:
-        del elements[key]
-    return elements
+        del items[key]
+    return items
 
 
 def omit(data: dict[str, Any], /, *paths: str) -> dict[str, Any]:
@@ -242,8 +247,9 @@ def omit(data: dict[str, Any], /, *paths: str) -> dict[str, Any]:
 
     The opposite of pick. Paths use dot notation for dictionary keys and brackets for list
     indices, e.g. "a.b[0].c". Bracket indices may be negative and remove the element from the
-    list, shifting later elements. Paths that do not resolve are silently ignored, and paths are
-    applied in order, each against the result of the previous one. The input is not mutated:
+    list, shifting later elements; on a dictionary, as produced by pick and deep_set, a bracket
+    index removes the integer key instead. Paths that do not resolve are silently ignored, and
+    paths are applied in order, each against the result of the previous one. The input is not mutated:
     containers along omitted paths are copied, but untouched subtrees are shared with the input,
     not copied.
 
@@ -280,7 +286,8 @@ def pick(data: dict[str, Any], /, *paths: str) -> dict[str, Any]:
     """Pick values from a nested dictionary, preserving the nested structure.
 
     Paths use dot notation for dictionary keys and brackets for list indices, e.g. "a.b[0].c".
-    Bracket indices may be negative and appear as integer keys in the result. Paths that do not
+    Bracket indices may be negative and appear as integer keys in the result; they also resolve
+    integer dictionary keys when the container is a dictionary. Paths that do not
     resolve are silently skipped. The result is a newly built structure and overlapping paths are
     deep-merged into new dictionaries, but the picked leaf values themselves are not copied.
 
