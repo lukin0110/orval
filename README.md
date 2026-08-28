@@ -180,6 +180,20 @@ safe_float(None, default=1.0)
 ```
 
 ```python
+# First value that is not None (like SQL's COALESCE, or chaining ?? in JS).
+# Unlike `a or b or c`, falsy values such as 0, "" and False are kept.
+from orval import coalesce, coalesce_lazy
+
+coalesce(None, None, 0, 5)
+# Output: 0
+coalesce(None, None, default=8080)
+# Output: 8080
+
+# The lazy variant takes callables, so expensive fallbacks only run when needed.
+coalesce_lazy(lambda: cache.get(key), lambda: db.fetch(key))
+```
+
+```python
 from orval import pretty_duration
 
 pretty_duration(9000)
