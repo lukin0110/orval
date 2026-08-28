@@ -89,7 +89,7 @@ def test_parse_bytes_round_trip(size: int, fmt: str) -> None:
     assert parse_bytes(pretty_bytes(size, fmt)) == size
 
 
-@pytest.mark.parametrize("text", ["", "abc", "1..2", "KB 1", "1e309", "1e309 KB"])
+@pytest.mark.parametrize("text", ["", "abc", "1..2", "KB 1", "1e309", "1e309 KB", "1e308 YB"])
 def test_parse_bytes_invalid_text(text: str) -> None:
     """Should raise a ValueError for unparseable text."""
     with pytest.raises(ValueError, match="Cannot parse"):

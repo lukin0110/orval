@@ -137,17 +137,14 @@ def parse_bytes(text: str, /) -> int:
         raise ValueError(f"Cannot parse {text!r} as a byte size.")
     number_text = match.group("number")
     # Integers are parsed exactly (no float precision loss above 2**53).
-    number: int | float
-    if any(char in number_text for char in ".eE"):
-        number = float(number_text)
-        if not math.isfinite(number):
-            raise ValueError(f"Cannot parse {text!r} as a byte size.")
-    else:
-        number = int(number_text)
+    number: int | float = float(number_text) if any(char in number_text for char in ".eE") else int(number_text)
     if number < 0:
         raise ValueError("Size must be non-negative.")
     unit = match.group("unit")
     multiplier = _UNIT_MULTIPLIERS.get(unit.lower(), 0) if unit else 1
     if not multiplier:
         raise ValueError(f"Unknown byte unit: {unit!r}.")
-    return round(number * multiplier)
+    result = number * multiplier
+    if isinstance(result, float) and not math.isfinite(result):
+        raise ValueError(f"Cannot parse {text!r} as a byte size.")
+    return round(result)
