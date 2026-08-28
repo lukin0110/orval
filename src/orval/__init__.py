@@ -4,7 +4,7 @@ from importlib import metadata
 
 from orval.byte_utils import parse_bytes, pretty_bytes
 from orval.coercion import safe_float, safe_int, to_bool
-from orval.containers import chunkify, deep_merge, flatten, pick
+from orval.containers import chunkify, deep_get, deep_merge, deep_set, flatten, omit, pick
 from orval.datetimes import utcnow
 from orval.duration_utils import pretty_duration
 from orval.hashing import hashify
@@ -27,12 +27,15 @@ __version__ = metadata.version(__package__)  # ty: ignore[invalid-argument-type]
 __all__ = [
     "camel_case",
     "chunkify",
+    "deep_get",
     "deep_merge",
+    "deep_set",
     "dot_case",
     "flatten",
     "hashify",
     "kebab_case",
     "mask",
+    "omit",
     "parse_bytes",
     "pascal_case",
     "pick",
