@@ -1,5 +1,6 @@
 """Utility functions for working with bytes."""
 
+import math
 import re
 
 _BASE_1000: int = 1000
@@ -134,7 +135,15 @@ def parse_bytes(text: str, /) -> int:
     match = _PARSE_PATTERN.match(text.strip())
     if not match:
         raise ValueError(f"Cannot parse {text!r} as a byte size.")
-    number = float(match.group("number"))
+    number_text = match.group("number")
+    # Integers are parsed exactly (no float precision loss above 2**53).
+    number: int | float
+    if any(char in number_text for char in ".eE"):
+        number = float(number_text)
+        if not math.isfinite(number):
+            raise ValueError(f"Cannot parse {text!r} as a byte size.")
+    else:
+        number = int(number_text)
     if number < 0:
         raise ValueError("Size must be non-negative.")
     unit = match.group("unit")

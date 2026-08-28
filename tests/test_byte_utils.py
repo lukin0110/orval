@@ -62,6 +62,8 @@ def test_format_bytes_invalid_type() -> None:
         ("  1 kb  ", 1000),
         ("1e3 B", 1000),
         ("3.5MB", 3500000),
+        ("9007199254740993", 9007199254740993),
+        ("123456789012345678901 B", 123456789012345678901),
     ],
 )
 def test_parse_bytes(text: str, expected: int) -> None:
@@ -87,7 +89,7 @@ def test_parse_bytes_round_trip(size: int, fmt: str) -> None:
     assert parse_bytes(pretty_bytes(size, fmt)) == size
 
 
-@pytest.mark.parametrize("text", ["", "abc", "1..2", "KB 1"])
+@pytest.mark.parametrize("text", ["", "abc", "1..2", "KB 1", "1e309", "1e309 KB"])
 def test_parse_bytes_invalid_text(text: str) -> None:
     """Should raise a ValueError for unparseable text."""
     with pytest.raises(ValueError, match="Cannot parse"):
