@@ -47,6 +47,10 @@ def pretty_number(value: float, fmt: str = "s", /, precision: int = 1) -> str:
         raise TypeError("Value must be a number.")
     if fmt not in _FORMATS:
         raise ValueError(f"Format must be one of {_FORMATS}.\n  s: short (e.g. 1.2M)\n  l: long (e.g. 1.2 million)")
+    if not isinstance(precision, int):
+        raise TypeError("Precision must be an integer.")
+    if precision < 0:
+        raise ValueError("Precision must be a non-negative integer.")
     sign = "-" if value < 0 else ""
     try:
         scaled: float = float(abs(value))
