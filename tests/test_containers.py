@@ -72,40 +72,43 @@ def test_flatten_invalid_type() -> None:
 @pytest.mark.parametrize(
     ("sequence", "expected"),
     [
-        ([0, 1, None, 2, False, 3, ""], [1, 2, 3]),  # Mixed falsy values
+        ([0, 1, None, 2, False, 3, ""], [0, 1, 2, False, 3, ""]),  # Keep falsy, drop None
         ([1, 2, 3], [1, 2, 3]),  # Nothing to remove
-        ([None, False, 0, "", [], {}, ()], []),  # Only falsy values
+        ([None, None], []),  # Only None values
+        ([0, "", False], [0, "", False]),  # Falsy but not None
         ([], []),  # Empty list
-        ((0, "a", None), ["a"]),  # Tuple
-        (range(3), [1, 2]),  # Range
-        ([[1], [], [2]], [[1], [2]]),  # Nested empty containers
+        ((0, "a", None), [0, "a"]),  # Tuple
+        (range(3), [0, 1, 2]),  # Range
     ],
 )
 def test_compact(sequence: Iterable[Any], expected: list[Any]) -> None:
-    """Should remove all falsy values."""
+    """Should remove only None values by default."""
     assert compact(sequence) == expected
 
 
 @pytest.mark.parametrize(
     ("sequence", "expected"),
     [
-        ([0, 1, None, 2, False, 3, ""], [0, 1, 2, False, 3, ""]),  # Keep falsy, drop None
-        ([None, None], []),  # Only None values
-        ([0, "", False], [0, "", False]),  # Falsy but not None
+        ([0, 1, None, 2, False, 3, ""], [1, 2, 3]),  # Mixed falsy values
+        ([None, False, 0, "", [], {}, ()], []),  # Only falsy values
         ([], []),  # Empty list
+        (range(3), [1, 2]),  # Range
+        ([[1], [], [2]], [[1], [2]]),  # Nested empty containers
     ],
 )
-def test_compact_none_only(sequence: Iterable[Any], expected: list[Any]) -> None:
-    """Should remove only None values."""
-    assert compact(sequence, none_only=True) == expected
+def test_compact_falsy(sequence: Iterable[Any], expected: list[Any]) -> None:
+    """Should remove all falsy values with none_only=False."""
+    assert compact(sequence, none_only=False) == expected
 
 
-@suppress_type_checks
-@pytest.mark.parametrize("sequence", [1, "abc"])
-def test_compact_invalid_type(sequence: Any) -> None:
-    """Should raise a TypeError for non-iterable or string input."""
-    with pytest.raises(TypeError, match=r"Input must be a non-string iterable \(list, set, range, tuple\)\."):
-        compact(sequence)
+def test_compact_varargs() -> None:
+    """Should accept multiple values instead of a single iterable."""
+    assert compact(0, 1, None, 2) == [0, 1, 2]
+    assert compact(0, 1, None, 2, none_only=False) == [1, 2]
+    assert compact(None) == []
+    assert compact() == []
+    assert compact("abc") == ["abc"]  # A single string is one value, not iterated.
+    assert compact("a", None, "b") == ["a", "b"]
 
 
 @pytest.mark.parametrize(
