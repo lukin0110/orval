@@ -22,6 +22,7 @@ from orval.strings import (
     train_case,
     truncate,
 )
+from orval.token_utils import estimate_tokens, truncate_tokens
 from orval.utils import coalesce, coalesce_lazy, timing
 
 __version__ = metadata.version(__package__)  # ty: ignore[invalid-argument-type]
@@ -35,6 +36,7 @@ __all__ = [
     "deep_merge",
     "deep_set",
     "dot_case",
+    "estimate_tokens",
     "flatten",
     "hashify",
     "is_empty",
@@ -58,5 +60,6 @@ __all__ = [
     "to_bool",
     "train_case",
     "truncate",
+    "truncate_tokens",
     "utcnow",
 ]
