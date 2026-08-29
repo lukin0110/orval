@@ -94,8 +94,8 @@ def timing(func: Callable[..., R] | None = None, level: int = logging.INFO) -> A
 
         @wraps(func)
         async def async_wrapper(
-            *args: Any,
-            **kwargs: Any,
+            *args: object,
+            **kwargs: object,
         ) -> Any:
             """Log elapsed time of the wrapped coroutine function."""
             start = time.perf_counter()
@@ -108,8 +108,8 @@ def timing(func: Callable[..., R] | None = None, level: int = logging.INFO) -> A
 
     @wraps(func)
     def wrapper(
-        *args: Any,
-        **kwargs: Any,
+        *args: object,
+        **kwargs: object,
     ) -> Any:
         """Log elapsed time of the wrapped function."""
         start = time.perf_counter()
