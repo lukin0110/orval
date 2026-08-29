@@ -1,5 +1,6 @@
 """Utilities."""
 
+import inspect
 import logging
 import time
 from collections.abc import Callable
@@ -68,9 +69,11 @@ def coalesce_lazy(*values: Callable[[], T | None]) -> T | None:  # ruff: ignore[
 
 
 def timing(func: Callable[..., R] | None = None, level: int = logging.INFO) -> Any:  # ruff: ignore[non-pep695-generic-function]
-    """Log the elapsed time of a function.
+    """Log the elapsed time of a function or coroutine function.
 
     Decorator can be used with or without arguments. Eg: `@timing` or `@timing(level=logging.DEBUG)`.
+    Async-aware: decorating an ``async def`` function returns a coroutine function that
+    awaits the wrapped one and logs the elapsed time, including the time spent awaiting.
 
     Parameters
     ----------
@@ -87,9 +90,24 @@ def timing(func: Callable[..., R] | None = None, level: int = logging.INFO) -> A
     if func is None:
         return partial(timing, level=level)
 
+    if inspect.iscoroutinefunction(func):
+
+        async def async_wrapper(
+            *args: Any,
+            **kwargs: Any,
+        ) -> Any:
+            """Log elapsed time of the wrapped coroutine function."""
+            start = time.perf_counter()
+            result = await func(*args, **kwargs)
+            end = time.perf_counter()
+            logging.getLogger(__name__).log(level, f"Timing for '{func.__name__}': {end - start:.3f}s")  # ty: ignore[unresolved-attribute]
+            return result
+
+        return async_wrapper
+
     def wrapper(
-        *args: list[Any],
-        **kwargs: dict[str, Any],
+        *args: Any,
+        **kwargs: Any,
     ) -> Any:
         """Log elapsed time of the wrapped function."""
         start = time.perf_counter()
