@@ -89,6 +89,31 @@ mask("abc", show=4)
 # Output: ***
 ```
 
+### Token utils
+
+```python
+# Estimate LLM token counts without a tokenizer dependency (~4 chars or ~0.75
+# words per token, slightly denser for code). Not exact, but perfect for
+# "will this fit in the context window" guards.
+from orval import estimate_tokens
+
+estimate_tokens("Will this prompt fit in the context window?")
+# Output: 11
+estimate_tokens('def greet(name: str) -> str:\n    return f"Hello {name}"')
+# Output: 18
+```
+
+```python
+# Truncate a text so its estimated token count fits within a budget.
+# Cuts at a word boundary and returns the text unchanged if it already fits.
+from orval import truncate_tokens
+
+truncate_tokens("The quick brown fox jumps over the lazy dog.", 5)
+# Output: The quick brown fox
+truncate_tokens("Short enough.", 1000)
+# Output: Short enough.
+```
+
 ### Collection utils
 
 ```python
