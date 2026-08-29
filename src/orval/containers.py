@@ -1,7 +1,7 @@
 """Array utilities."""
 
 import re
-from collections.abc import Generator, Iterable
+from collections.abc import Generator, Iterable, Sized
 from itertools import islice
 from typing import Any, TypeVar, cast
 
@@ -113,6 +113,41 @@ def compact(*seq: T | Iterable[T], none_only: bool = True) -> list[T]:  # ruff: 
     if none_only:
         return [item for item in items if item is not None]
     return [item for item in items if item]
+
+
+def is_empty(value: Any) -> bool:
+    """Check whether a value is empty.
+
+    A value is empty when it is ``None`` or a sized container without elements: ``""``,
+    ``b""``, ``[]``, ``()``, ``{}``, ``set()``, ``range(0)``, etc. Emptiness is not
+    truthiness: values without a length — numbers, booleans, generators, arbitrary
+    objects — are never empty, so ``0`` and ``False`` are kept apart from ``None`` and
+    ``[]``. A whitespace-only string is not empty; strip it first if needed.
+
+    Parameters
+    ----------
+    value
+        The value to check.
+
+    Returns
+    -------
+    bool
+        True when the value is None or a sized container without elements.
+
+    Examples
+    --------
+    >>> is_empty(None)
+    True
+    >>> is_empty([])
+    True
+    >>> is_empty("")
+    True
+    >>> is_empty(0)
+    False
+    >>> is_empty(False)
+    False
+    """
+    return value is None or (isinstance(value, Sized) and len(value) == 0)
 
 
 def deep_merge(*dicts: dict[Any, Any]) -> dict[Any, Any]:

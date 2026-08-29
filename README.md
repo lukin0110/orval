@@ -122,6 +122,23 @@ compact([0, 1, None, 2, False, 3, ""], none_only=False)
 ```
 
 ```python
+# Check whether a value is empty: None or a sized container without elements.
+# Unlike truthiness, 0 and False are not empty.
+from orval import is_empty
+
+is_empty(None)
+# Output: True
+is_empty([])
+# Output: True
+is_empty("")
+# Output: True
+is_empty(0)
+# Output: False
+is_empty(False)
+# Output: False
+```
+
+```python
 from orval import pick
 
 pick({"a": {"b": [1, 2, 3], "c": 4}, "d": 5}, "a.b[0]", "d")
