@@ -7,7 +7,7 @@ from typing import Any
 import pytest
 from typeguard import suppress_type_checks
 
-from orval import chunkify, compact, deep_get, deep_merge, deep_set, flatten, omit, pick
+from orval import chunkify, compact, deep_get, deep_merge, deep_set, flatten, is_empty, omit, pick
 
 
 @pytest.mark.parametrize(
@@ -109,6 +109,38 @@ def test_compact_varargs() -> None:
     assert compact() == []
     assert compact("abc") == ["abc"]  # A single string is one value, not iterated.
     assert compact("a", None, "b") == ["a", "b"]
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        (None, True),  # None is empty
+        ("", True),  # Empty string
+        (b"", True),  # Empty bytes
+        ([], True),  # Empty list
+        ((), True),  # Empty tuple
+        ({}, True),  # Empty dict
+        (set(), True),  # Empty set
+        (frozenset(), True),  # Empty frozenset
+        (range(0), True),  # Empty range
+        ("  ", False),  # Whitespace-only string is not empty
+        ("a", False),  # Non-empty string
+        (b"x", False),  # Non-empty bytes
+        ([0], False),  # Non-empty list, even with a falsy element
+        ({"a": 1}, False),  # Non-empty dict
+        ({0}, False),  # Non-empty set
+        (range(3), False),  # Non-empty range
+        (0, False),  # Zero is not empty
+        (0.0, False),  # Zero float is not empty
+        (False, False),  # False is not empty
+        (True, False),  # True is not empty
+        (object(), False),  # Arbitrary object is not empty
+        ((i for i in []), False),  # Generators have no length, never empty
+    ],
+)
+def test_is_empty(value: Any, expected: bool) -> None:
+    """Should report None and sized containers without elements as empty."""
+    assert is_empty(value) is expected
 
 
 @pytest.mark.parametrize(

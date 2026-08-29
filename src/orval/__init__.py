@@ -4,7 +4,7 @@ from importlib import metadata
 
 from orval.byte_utils import parse_bytes, pretty_bytes
 from orval.coercion import safe_float, safe_int, to_bool
-from orval.containers import chunkify, compact, deep_get, deep_merge, deep_set, flatten, omit, pick
+from orval.containers import chunkify, compact, deep_get, deep_merge, deep_set, flatten, is_empty, omit, pick
 from orval.datetimes import utcnow
 from orval.duration_utils import parse_duration, pretty_duration
 from orval.hashing import hashify
@@ -37,6 +37,7 @@ __all__ = [
     "dot_case",
     "flatten",
     "hashify",
+    "is_empty",
     "kebab_case",
     "mask",
     "omit",
