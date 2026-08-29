@@ -4,7 +4,7 @@ import inspect
 import logging
 import time
 from collections.abc import Callable
-from functools import partial
+from functools import partial, wraps
 from typing import Any, TypeVar
 
 R = TypeVar("R")
@@ -80,7 +80,7 @@ def timing(func: Callable[..., R] | None = None, level: int = logging.INFO) -> A
     func
         The wrapped function to log the elapsed time of.
     level
-        Log level to user. Default: INFO.
+        Log level to use. Default: INFO.
 
     Returns
     -------
@@ -92,6 +92,7 @@ def timing(func: Callable[..., R] | None = None, level: int = logging.INFO) -> A
 
     if inspect.iscoroutinefunction(func):
 
+        @wraps(func)
         async def async_wrapper(
             *args: Any,
             **kwargs: Any,
@@ -105,6 +106,7 @@ def timing(func: Callable[..., R] | None = None, level: int = logging.INFO) -> A
 
         return async_wrapper
 
+    @wraps(func)
     def wrapper(
         *args: Any,
         **kwargs: Any,
