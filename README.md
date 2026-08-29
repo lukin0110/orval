@@ -130,6 +130,35 @@ pick({"a": {"b": 1, "c": 2}}, "a.c", "a.x")
 # Output: {'a': {'c': 2}}
 ```
 
+```python
+# The opposite of pick: drop nested paths, keep everything else.
+from orval import omit
+
+omit({"a": {"b": 1, "c": 2}, "d": 5}, "a.b")
+# Output: {'a': {'c': 2}, 'd': 5}
+omit({"a": [10, 20, 30]}, "a[1]")
+# Output: {'a': [10, 30]}
+```
+
+```python
+from orval import deep_get
+
+deep_get({"a": {"b": [1, 2, 3]}}, "a.b[0]")
+# Output: 1
+deep_get({"a": {"b": 1}}, "a.x", default=42)
+# Output: 42
+```
+
+```python
+# Returns a new dictionary, creating intermediate dictionaries as needed.
+from orval import deep_set
+
+deep_set({"a": {"b": 1}}, "a.c", 2)
+# Output: {'a': {'b': 1, 'c': 2}}
+deep_set({}, "a.b[0]", 1)
+# Output: {'a': {'b': {0: 1}}}
+```
+
 ### Misc utils
 ```python
 # Hash any Python object.

@@ -4,7 +4,7 @@ from importlib import metadata
 
 from orval.byte_utils import parse_bytes, pretty_bytes
 from orval.coercion import safe_float, safe_int, to_bool
-from orval.containers import chunkify, compact, deep_merge, flatten, pick
+from orval.containers import chunkify, compact, deep_get, deep_merge, deep_set, flatten, omit, pick
 from orval.datetimes import utcnow
 from orval.duration_utils import parse_duration, pretty_duration
 from orval.hashing import hashify
@@ -31,12 +31,15 @@ __all__ = [
     "coalesce",
     "coalesce_lazy",
     "compact",
+    "deep_get",
     "deep_merge",
+    "deep_set",
     "dot_case",
     "flatten",
     "hashify",
     "kebab_case",
     "mask",
+    "omit",
     "parse_bytes",
     "parse_duration",
     "pascal_case",
