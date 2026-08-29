@@ -71,7 +71,7 @@ def coalesce_lazy(*values: Callable[[], T | None]) -> T | None:  # ruff: ignore[
 def timing(func: Callable[..., R] | None = None, level: int = logging.INFO) -> Any:  # ruff: ignore[non-pep695-generic-function]
     """Log the elapsed time of a function or coroutine function.
 
-    Decorator can be used with or without arguments. Eg: `@timing` or `@timing(level=logging.DEBUG)`.
+    The decorator can be used with or without arguments, e.g. `@timing` or `@timing(level=logging.DEBUG)`.
     Async-aware: decorating an ``async def`` function returns a coroutine function that
     awaits the wrapped one and logs the elapsed time, including the time spent awaiting.
 

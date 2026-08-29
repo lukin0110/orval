@@ -145,5 +145,7 @@ def test_timing_async_includes_await_time(caplog: pytest.LogCaptureFixture) -> N
 
     with caplog.at_level(logging.INFO, logger="orval.utils"):
         asyncio.run(slow())
+    assert len(caplog.records) == 1
     elapsed = float(caplog.records[0].message.split(": ")[1].removesuffix("s"))
-    assert elapsed >= 0.05
+    # The logged value is rounded to 3 decimals, so allow for rounding down by up to 0.001.
+    assert elapsed >= 0.05 - 0.001
