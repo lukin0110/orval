@@ -37,7 +37,7 @@ def _estimate(text: str, chars_per_token: float) -> int:
     so the guard errs toward overestimating.
     """
     char_estimate = len(text) / chars_per_token
-    word_estimate = len(_WORD_RE.findall(text)) / _WORDS_PER_TOKEN
+    word_estimate = sum(1 for _ in _WORD_RE.finditer(text)) / _WORDS_PER_TOKEN
     return max(1, int(max(char_estimate, word_estimate) + 0.5))
 
 
