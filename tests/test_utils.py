@@ -4,6 +4,8 @@ import asyncio
 import inspect
 import logging
 from collections.abc import Callable
+from pathlib import Path
+from typing import assert_type
 
 import pytest
 
@@ -75,6 +77,51 @@ def test_coalesce_lazy_propagates_errors() -> None:
         coalesce_lazy(lambda: None, boom)
     # A callable after a non-None result is never invoked, so it does not raise.
     assert coalesce_lazy(lambda: 1, boom) == 1
+
+
+def test_coalesce_narrows_return_type_with_non_none_fallback() -> None:
+    """Should type the result as ``T`` rather than ``T | None`` when the last value cannot be None.
+
+    The ``assert_type`` calls are no-ops at runtime; ``ty check`` verifies them statically.
+    """
+
+    def check(maybe: Path | None, fallback: Path) -> Path:
+        assert_type(coalesce(fallback), Path)
+        assert_type(coalesce(maybe, fallback), Path)
+        assert_type(coalesce(maybe, maybe, maybe, maybe, fallback), Path)
+        # The last value may be None, so the result may be None too.
+        assert_type(coalesce(maybe, maybe), Path | None)
+        assert_type(coalesce(maybe, None), Path | None)
+        # A chain longer than five values falls back to the variadic signature.
+        assert_type(coalesce(maybe, maybe, maybe, maybe, maybe, fallback), Path | None)
+        # Under a strict type checker this return only passes because the result is a ``Path``.
+        return coalesce(maybe, fallback)
+
+    assert check(None, Path("/srv")) == Path("/srv")
+    assert check(Path("/home"), Path("/srv")) == Path("/home")
+
+
+def test_coalesce_lazy_narrows_return_type_with_non_none_fallback() -> None:
+    """Should type the result as ``T`` rather than ``T | None`` when the last callable cannot return None.
+
+    The ``assert_type`` calls are no-ops at runtime; ``ty check`` verifies them statically.
+    """
+
+    def check(maybe: Path | None, from_env: Callable[[], Path | None], fallback: Path) -> Path:
+        assert_type(coalesce_lazy(lambda: fallback), Path)
+        assert_type(coalesce_lazy(lambda: maybe, lambda: fallback), Path)
+        assert_type(coalesce_lazy(lambda: maybe, from_env, from_env, from_env, lambda: fallback), Path)
+        # The last callable may return None, so the result may be None too.
+        assert_type(coalesce_lazy(lambda: maybe, from_env), Path | None)
+        assert_type(coalesce_lazy(from_env), Path | None)
+        # A chain longer than five callables falls back to the variadic signature.
+        assert_type(coalesce_lazy(from_env, from_env, from_env, from_env, from_env, lambda: fallback), Path | None)
+        # Under a strict type checker this return only passes because the result is a ``Path``.
+        return coalesce_lazy(lambda: maybe, from_env, lambda: fallback)
+
+    assert check(None, lambda: None, Path("/srv")) == Path("/srv")
+    assert check(None, lambda: Path("/env"), Path("/srv")) == Path("/env")
+    assert check(Path("/home"), lambda: Path("/env"), Path("/srv")) == Path("/home")
 
 
 def test_timing_sync(caplog: pytest.LogCaptureFixture) -> None:
