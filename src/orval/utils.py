@@ -5,12 +5,29 @@ import logging
 import time
 from collections.abc import Callable
 from functools import partial, wraps
-from typing import Any, TypeVar
+from typing import Any, TypeVar, overload
 
 R = TypeVar("R")
 T = TypeVar("T")
 
 
+# The overloads below enumerate arities so that a chain whose last value cannot be None (a
+# constant fallback) is typed as ``T`` instead of ``T | None``, the same way typeshed types
+# ``zip`` and ``map``. Chains longer than five values fall back to the variadic signature.
+# ruff: disable[non-pep695-generic-function]
+@overload
+def coalesce(v1: T, /) -> T: ...
+@overload
+def coalesce(v1: T | None, v2: T, /) -> T: ...
+@overload
+def coalesce(v1: T | None, v2: T | None, v3: T, /) -> T: ...
+@overload
+def coalesce(v1: T | None, v2: T | None, v3: T | None, v4: T, /) -> T: ...
+@overload
+def coalesce(v1: T | None, v2: T | None, v3: T | None, v4: T | None, v5: T, /) -> T: ...
+@overload
+def coalesce(*values: T | None) -> T | None: ...
+# ruff: enable[non-pep695-generic-function]
 def coalesce(*values: T | None) -> T | None:  # ruff: ignore[non-pep695-generic-function]
     """Return the first value that is not None.
 
@@ -28,7 +45,9 @@ def coalesce(*values: T | None) -> T | None:  # ruff: ignore[non-pep695-generic-
     Returns
     -------
     T | None
-        The first value that is not None, or None when all values are None.
+        The first value that is not None, or None when all values are None. When the last
+        value cannot be None, such as a constant fallback, the return type narrows to ``T``
+        (for chains of up to five values), so ``coalesce(maybe_port, 8080)`` is an ``int``.
 
     Examples
     --------
@@ -40,6 +59,29 @@ def coalesce(*values: T | None) -> T | None:  # ruff: ignore[non-pep695-generic-
     return next((value for value in values if value is not None), None)
 
 
+# ruff: disable[non-pep695-generic-function]
+@overload
+def coalesce_lazy(v1: Callable[[], T], /) -> T: ...
+@overload
+def coalesce_lazy(v1: Callable[[], T | None], v2: Callable[[], T], /) -> T: ...
+@overload
+def coalesce_lazy(v1: Callable[[], T | None], v2: Callable[[], T | None], v3: Callable[[], T], /) -> T: ...
+@overload
+def coalesce_lazy(
+    v1: Callable[[], T | None], v2: Callable[[], T | None], v3: Callable[[], T | None], v4: Callable[[], T], /
+) -> T: ...
+@overload
+def coalesce_lazy(
+    v1: Callable[[], T | None],
+    v2: Callable[[], T | None],
+    v3: Callable[[], T | None],
+    v4: Callable[[], T | None],
+    v5: Callable[[], T],
+    /,
+) -> T: ...
+@overload
+def coalesce_lazy(*values: Callable[[], T | None]) -> T | None: ...
+# ruff: enable[non-pep695-generic-function]
 def coalesce_lazy(*values: Callable[[], T | None]) -> T | None:  # ruff: ignore[non-pep695-generic-function]
     """Return the first callable's result that is not None, calling them lazily.
 
@@ -56,7 +98,9 @@ def coalesce_lazy(*values: Callable[[], T | None]) -> T | None:  # ruff: ignore[
     Returns
     -------
     T | None
-        The first result that is not None, or None when all results are None.
+        The first result that is not None, or None when all results are None. When the last
+        callable cannot return None, such as ``lambda: 8080``, the return type narrows to
+        ``T`` (for chains of up to five callables).
 
     Examples
     --------

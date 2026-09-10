@@ -274,6 +274,11 @@ coalesce(None, None, 8080)
 
 # The lazy variant takes callables, so expensive fallbacks only run when needed.
 coalesce_lazy(lambda: cache.get(key), lambda: db.fetch(key))
+
+# When the last value cannot be None, the result is typed as `T` rather than `T | None`,
+# so a fallback chain that ends in a constant passes strict type checkers as-is.
+def workspace_dir(explicit: Path | None = None) -> Path:
+    return coalesce_lazy(lambda: explicit, workspace_from_env, lambda: DEFAULT_WORKSPACE)
 ```
 
 ```python
