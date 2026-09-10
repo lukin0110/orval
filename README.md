@@ -77,6 +77,17 @@ strip_accents("café こんにちは")
 ```
 
 ```python
+# Remove or replace ASCII control characters (newline, tab, NUL, escape, DEL)
+# before putting untrusted values in a log line or terminal.
+from orval import strip_control
+
+strip_control("user\nname\x00")
+# Output: username
+strip_control("user\nname", replacement=" ")
+# Output: user name
+```
+
+```python
 # Redact sensitive values (API keys, tokens, card numbers) while keeping a few
 # characters visible. Strings with 'show' or fewer characters are fully masked.
 from orval import mask

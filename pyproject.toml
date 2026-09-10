@@ -50,7 +50,7 @@ dev = [
 ]
 
 [tool.coverage.report]  # https://coverage.readthedocs.io/en/latest/config.html#report
-fail_under = 91
+fail_under = 93
 precision = 1
 show_missing = true
 skip_covered = true

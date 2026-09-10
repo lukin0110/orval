@@ -12,6 +12,7 @@ from orval import (
     slugify,
     snake_case,
     strip_accents,
+    strip_control,
     strip_styling,
     train_case,
     truncate,
@@ -363,3 +364,54 @@ def test_strip_accents(string: str, expected: str) -> None:
 def test_strip_styling(string: str, expected: str) -> None:
     """Should strip styling from text."""
     assert strip_styling(string) == expected
+
+
+@pytest.mark.parametrize(
+    ("string", "expected"),
+    [
+        ("plain text", "plain text"),
+        ("", ""),
+        # Newline, carriage return and tab.
+        ("user\nname", "username"),
+        ("a\r\nb", "ab"),
+        ("col\tumn", "column"),
+        # NUL and other low controls.
+        ("id\x00", "id"),
+        ("\x01\x02abc\x1f", "abc"),
+        # Escape is removed; the printable tail of an ANSI sequence stays.
+        ("\x1b[31mred\x1b[0m", "[31mred[0m"),
+        # DEL.
+        ("del\x7f", "del"),
+        # Neighbours of the range are untouched: space, tilde and C1 controls.
+        (" \x20!", "  !"),
+        ("~\x7e", "~~"),
+        ("\x80\x9f", "\x80\x9f"),
+        # Non-ASCII and zero-width characters are untouched (see 'strip_styling').
+        ("café こんにちは", "café こんにちは"),
+        ("hel\u200blo", "hel\u200blo"),
+    ],
+)
+def test_strip_control(string: str, expected: str) -> None:
+    """Should strip ASCII control characters from a string."""
+    assert strip_control(string) == expected
+
+
+@pytest.mark.parametrize(
+    ("string", "replacement", "expected"),
+    [
+        ("user\nname", " ", "user name"),
+        # One replacement per control character, no collapsing.
+        ("a\r\nb", " ", "a  b"),
+        ("a\x00b\x7fc", "?", "a?b?c"),
+        # Multi-character replacement, and backslashes are taken literally (no re.sub
+        # template expansion).
+        ("tab\there", "\\t", "tab\\there"),
+        ("a\x00b", "\\", "a\\b"),
+        ("a\x00b", "\\1", "a\\1b"),
+        ("clean", "?", "clean"),
+        ("", "?", ""),
+    ],
+)
+def test_strip_control_replacement(string: str, replacement: str, expected: str) -> None:
+    """Should replace each ASCII control character with the given replacement."""
+    assert strip_control(string, replacement=replacement) == expected
