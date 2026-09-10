@@ -89,6 +89,16 @@ mask("abc", show=4)
 # Output: ***
 ```
 
+```python
+# Truncate a string to at most 'number' characters, suffix included.
+from orval import truncate
+
+truncate("hello world", 8)
+# Output: hello...
+truncate("hello world", 8, suffix="")
+# Output: hello wo
+```
+
 ### Token utils
 
 ```python
