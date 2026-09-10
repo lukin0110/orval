@@ -217,12 +217,49 @@ def dot_case(string: str, scream: bool = False, unicode: bool = True, compact_sp
 
 
 def truncate(string: str, number: int, /, suffix: str = "...") -> str:
-    """Truncate a string to a certain number of characters."""
+    """Truncate a string to at most a certain number of characters.
+
+    If the string already fits it is returned unchanged. Otherwise it is cut so that
+    the result, including the suffix, is exactly 'number' characters long. Pass an
+    empty suffix for a plain cut.
+
+    Parameters
+    ----------
+    string
+        The string to truncate.
+    number
+        The maximum number of characters the result may contain.
+    suffix
+        Appended to the cut string to signal truncation (default is "...").
+        Counts toward 'number'.
+
+    Returns
+    -------
+    str
+        The string, or its prefix plus the suffix, never longer than 'number'.
+
+    Raises
+    ------
+    ValueError
+        If 'number' is not a positive integer, or if 'suffix' is not shorter
+        than 'number'.
+
+    Examples
+    --------
+    >>> truncate("hello world", 8)
+    'hello...'
+    >>> truncate("hello world", 8, suffix="")
+    'hello wo'
+    >>> truncate("hello", 8)
+    'hello'
+    """
     if number <= 0:
         raise ValueError("Number must be a positive integer.")
+    if len(suffix) >= number:
+        raise ValueError("Suffix must be shorter than the number of characters.")
     if len(string) <= number:
         return string
-    return f"{string[: number - 1]}{suffix}"
+    return f"{string[: number - len(suffix)]}{suffix}"
 
 
 def mask(string: str, /, show: int = 4, side: str = "r", mask_char: str = "*") -> str:

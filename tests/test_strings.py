@@ -224,26 +224,53 @@ def test_dot_case(string: str, scream: bool, expected: str) -> None:
 @pytest.mark.parametrize(
     ("string", "number", "suffix", "expected"),
     [
-        ("hello world", 5, "...", "hell..."),
+        ("hello world", 8, "...", "hello..."),
+        ("hello world", 5, "...", "he..."),
+        ("hello world", 4, "...", "h..."),
+        ("hello world", 5, "--", "hel--"),
         ("hello world", 11, "...", "hello world"),
         ("hello world", 12, "...", "hello world"),
-        ("hello world", 0, "...", ValueError),
-        ("hello world", -1, "...", ValueError),
-        ("hello world", 5, "--", "hell--"),
         ("hello", 5, "...", "hello"),
-        ("hello", 4, "...", "hel..."),
+        ("hello", 4, "...", "h..."),
+        ("hello world", 5, "", "hello"),
+        ("abcdef", 3, "", "abc"),
+        ("a", 1, "", "a"),
         ("", 5, "...", ""),
-        ("a", 1, "...", "a"),
-        ("a", 2, "...", "a"),
     ],
 )
-def test_truncate(string: str, number: int, suffix: str, expected: str | type[ValueError]) -> None:
-    """Should truncate a string to a certain number of characters."""
-    if expected is ValueError:
-        with pytest.raises(ValueError, match=r"Number must be a positive integer."):
-            truncate(string, number, suffix)
-    else:
-        assert truncate(string, number, suffix) == expected
+def test_truncate(string: str, number: int, suffix: str, expected: str) -> None:
+    """Should truncate a string to at most a certain number of characters."""
+    assert truncate(string, number, suffix) == expected
+
+
+def test_truncate_invalid() -> None:
+    """Should raise a ValueError for a non-positive 'number' or an oversized 'suffix'."""
+    with pytest.raises(ValueError, match=r"Number must be a positive integer."):
+        truncate("hello world", 0)
+    with pytest.raises(ValueError, match=r"Number must be a positive integer."):
+        truncate("hello world", -1)
+    with pytest.raises(ValueError, match=r"Suffix must be shorter than the number of characters."):
+        truncate("hello world", 3)
+    with pytest.raises(ValueError, match=r"Suffix must be shorter than the number of characters."):
+        truncate("hello world", 2)
+    # The check depends only on the arguments, not on whether the input would need cutting.
+    with pytest.raises(ValueError, match=r"Suffix must be shorter than the number of characters."):
+        truncate("a", 2)
+
+
+def test_truncate_respects_limit() -> None:
+    """Should never return more than 'number' characters, whatever the suffix."""
+    string = "abcdefghijkl"
+    for suffix in ("", ".", "...", " [more]"):
+        for number in range(len(suffix) + 1, 15):
+            result = truncate(string, number, suffix)
+            assert len(result) <= number
+            if len(string) > number:
+                assert len(result) == number
+                assert result.endswith(suffix)
+                assert string.startswith(result[: number - len(suffix)])
+            else:
+                assert result == string
 
 
 @pytest.mark.parametrize(
