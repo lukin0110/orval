@@ -13,6 +13,8 @@ _HTML_TAG_RE = re.compile(r"<[^<>]+>")
 # Covers: ZWSP/ZWNJ/ZWJ + LRM/RLM (U+200B-U+200F), bidi embedding/override controls
 # (U+202A-U+202E), word joiner / invisible operators (U+2060-U+206F), and BOM (U+FEFF).
 _ZERO_WIDTH_RE = re.compile("[\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff]")  # ruff: ignore[unraw-re-pattern]
+# ASCII control characters: C0 controls (NUL..US, incl. tab/newline/escape) and DEL.
+_CONTROL_RE = re.compile(r"[\x00-\x1f\x7f]")
 # Which end of the string stays visible when masking: leading or trailing characters.
 _SIDES: set[str] = {"l", "r"}
 
@@ -363,3 +365,35 @@ def strip_styling(string: str) -> str:
     decoded = html.unescape(without_tags)
     normalized = unicodedata.normalize("NFKC", decoded)
     return _ZERO_WIDTH_RE.sub("", normalized)
+
+
+def strip_control(string: str, replacement: str = "") -> str:
+    """Strip ASCII control characters from a string.
+
+    Removes (or replaces) the C0 control characters ``U+0000``–``U+001F``
+    (including tab, newline, carriage return and escape) and DEL (``U+007F``).
+    Useful before writing untrusted values into a log line or terminal, where a
+    stray newline would split one record into two or forge an extra line.
+
+    Each control character is replaced individually, so a carriage return
+    followed by a newline with ``replacement=" "`` becomes two spaces. Only the
+    control character itself is removed: the printable tail of an ANSI escape
+    sequence (e.g. ``[31m`` after the escape character) is left in place.
+    Non-ASCII text, zero-width characters and C1 controls (``U+0080``–``U+009F``)
+    are untouched; see 'strip_styling' for zero-width characters.
+
+    Parameters
+    ----------
+    string
+        Input string to strip control characters from.
+    replacement
+        String to substitute, literally, for each control character. Defaults to ``""``.
+
+    Returns
+    -------
+    str
+        The string with control characters removed or replaced.
+    """
+    # A callable makes re.sub use the replacement literally; as a string it would be
+    # expanded as a template, so a backslash in the replacement would break or mangle it.
+    return _CONTROL_RE.sub(lambda _: replacement, string)
