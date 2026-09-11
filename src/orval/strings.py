@@ -343,7 +343,7 @@ def strip_control(string: str, replacement: str = "") -> str:
     control character itself is removed: the printable tail of an ANSI escape
     sequence (e.g. ``[31m`` after the escape character) is left in place.
     Non-ASCII text, zero-width characters and C1 controls (``U+0080``–``U+009F``)
-    are untouched; see 'strip_styling' for zero-width characters.
+    are untouched; see ``strip_styling`` for zero-width characters.
 
     Parameters
     ----------
