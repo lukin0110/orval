@@ -211,6 +211,24 @@ deep_set({}, "a.b[0]", 1)
 # Output: {'a': {'b': {0: 1}}}
 ```
 
+### Datetime utils
+
+```python
+# Normalise a datetime to UTC. Naive datetimes are assumed to already be UTC (the stdlib
+# hands those out freely); pass assume_utc=False to raise instead of guessing.
+import datetime
+from orval import to_utc, utcnow
+
+utcnow()
+# Output: datetime.datetime(2024, 1, 1, 12, 0, 0, 123456, tzinfo=datetime.timezone.utc)
+to_utc(datetime.datetime(2024, 1, 1, 12, 0))
+# Output: datetime.datetime(2024, 1, 1, 12, 0, tzinfo=datetime.timezone.utc)
+to_utc(datetime.datetime(2024, 1, 1, 12, 0, tzinfo=datetime.timezone(datetime.timedelta(hours=1))))
+# Output: datetime.datetime(2024, 1, 1, 11, 0, tzinfo=datetime.timezone.utc)
+to_utc(datetime.datetime(2024, 1, 1, 12, 0), assume_utc=False)
+# Raises: ValueError: Datetime must be timezone-aware.
+```
+
 ### Misc utils
 ```python
 # Hash any Python object.
