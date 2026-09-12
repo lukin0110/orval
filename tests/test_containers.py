@@ -128,6 +128,7 @@ def test_compact_varargs() -> None:
         ([{"a": 1}, {"a": 1}, {"b": 2}], [{"a": 1}, {"b": 2}]),  # Unhashable items
         ([[1], [1], [2]], [[1], [2]]),  # Unhashable items, mixed lengths
         ([{"a": 1}, 1, {"a": 1}, 1], [{"a": 1}, 1]),  # Hashable and unhashable mixed
+        ([{"a": 1}, 0, {"a": 1}, 0], [{"a": 1}, 0]),  # 0 hashes into the same bucket as unhashables
     ],
 )
 def test_unique(sequence: Iterable[Any], expected: list[Any]) -> None:
@@ -206,6 +207,36 @@ def test_unique_key_called_once_per_item() -> None:
 
     assert unique([{"a": 1, "b": 1}, {"a": 1, "b": 2}], key=[first, second]) == [{"a": 1, "b": 1}]
     assert calls == ["first", "second", "first"]
+
+
+class _Ambiguous:
+    """A comparison result whose truthiness raises, the way a numpy array's does."""
+
+    def __bool__(self) -> bool:
+        raise ValueError("The truth value of an array with more than one element is ambiguous.")
+
+
+class _Arrayish:
+    """An unhashable value whose __eq__ answers with something other than a boolean."""
+
+    __hash__ = None  # type: ignore[assignment]
+
+    # A deliberately non-boolean __eq__, exactly what this test is about.
+    def __eq__(self, other: object) -> _Ambiguous:  # ty: ignore[invalid-method-override]
+        return _Ambiguous()
+
+
+def test_unique_ambiguous_equality() -> None:
+    """Should keep values whose equality is not a boolean instead of raising on them."""
+    first, second = _Arrayish(), _Arrayish()
+    assert unique([first, second]) == [first, second]
+    assert unique([{"a": first}, {"a": second}], key=itemgetter("a")) == [{"a": first}, {"a": second}]
+
+
+def test_unique_ambiguous_equality_same_object() -> None:
+    """Should still collapse the very same object, whose equality never has to be evaluated."""
+    only = _Arrayish()
+    assert unique([only, only]) == [only]
 
 
 def test_unique_empty_keys() -> None:
