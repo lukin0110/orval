@@ -23,6 +23,7 @@ from orval.number_utils import pretty_number
 from orval.strings import (
     camel_case,
     dot_case,
+    has_control,
     kebab_case,
     mask,
     pascal_case,
@@ -50,6 +51,7 @@ __all__ = [
     "dot_case",
     "estimate_tokens",
     "flatten",
+    "has_control",
     "hashify",
     "is_empty",
     "kebab_case",

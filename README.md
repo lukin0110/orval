@@ -88,6 +88,17 @@ strip_control("user\nname", replacement=" ")
 ```
 
 ```python
+# Check for ASCII control characters instead of removing them, for values that
+# should be rejected rather than repaired (e.g. a filename or an identifier).
+from orval import has_control
+
+has_control("user\nname")
+# Output: True
+has_control("café こんにちは")
+# Output: False
+```
+
+```python
 # Redact sensitive values (API keys, tokens, card numbers) while keeping a few
 # characters visible. Strings with 'show' or fewer characters are fully masked.
 from orval import mask
