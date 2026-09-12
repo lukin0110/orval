@@ -397,3 +397,30 @@ def strip_control(string: str, replacement: str = "") -> str:
     # A callable makes re.sub use the replacement literally; as a string it would be
     # expanded as a template, so a backslash in the replacement would break or mangle it.
     return _CONTROL_RE.sub(lambda _: replacement, string)
+
+
+def has_control(string: str) -> bool:
+    """Check whether a string contains an ASCII control character.
+
+    The predicate behind ``strip_control``: it recognizes exactly the same
+    characters, the C0 controls ``U+0000``-``U+001F`` (including tab, newline,
+    carriage return and escape) and DEL (``U+007F``). Non-ASCII text, zero-width
+    characters and C1 controls (``U+0080``-``U+009F``) do not count, and neither
+    does the printable tail of an ANSI escape sequence (e.g. ``[31m``).
+
+    Use it where a control character is a reason to reject a value rather than
+    repair it, such as a path component or an identifier, where a sanitized
+    string would silently name something else. It answers that question without
+    building a scrubbed copy only to compare it away.
+
+    Parameters
+    ----------
+    string
+        Input string to check for control characters.
+
+    Returns
+    -------
+    bool
+        True if the string contains at least one ASCII control character, False otherwise.
+    """
+    return bool(_CONTROL_RE.search(string))

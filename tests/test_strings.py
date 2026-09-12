@@ -6,6 +6,7 @@ from typeguard import suppress_type_checks
 from orval import (
     camel_case,
     dot_case,
+    has_control,
     kebab_case,
     mask,
     pascal_case,
@@ -442,3 +443,50 @@ def test_strip_control(string: str, expected: str) -> None:
 def test_strip_control_replacement(string: str, replacement: str, expected: str) -> None:
     """Should replace each ASCII control character with the given replacement."""
     assert strip_control(string, replacement=replacement) == expected
+
+
+@pytest.mark.parametrize(
+    ("string", "expected"),
+    [
+        ("plain text", False),
+        ("", False),
+        # Newline, carriage return and tab.
+        ("user\nname", True),
+        ("a\r\nb", True),
+        ("col\tumn", True),
+        # NUL and other low controls.
+        ("id\x00", True),
+        ("\x01\x02abc\x1f", True),
+        # Escape; the printable tail of an ANSI sequence on its own does not count.
+        ("\x1b[31mred\x1b[0m", True),
+        ("[31mred[0m", False),
+        # DEL.
+        ("del\x7f", True),
+        # Neighbours of the range are not control characters: space, tilde and C1 controls.
+        (" \x20!", False),
+        ("~\x7e", False),
+        ("\x80\x9f", False),
+        # Non-ASCII and zero-width characters are not control characters.
+        ("café こんにちは", False),
+        ("hel\u200blo", False),
+    ],
+)
+def test_has_control(string: str, expected: bool) -> None:
+    """Should report whether a string contains an ASCII control character."""
+    assert has_control(string) is expected
+
+
+@pytest.mark.parametrize(
+    "string",
+    [
+        "plain text",
+        "",
+        "user\nname",
+        "\x1b[31mred\x1b[0m",
+        "del\x7f",
+        "hel\u200blo",
+    ],
+)
+def test_has_control_matches_strip_control(string: str) -> None:
+    """Should agree with 'strip_control' about which strings contain control characters."""
+    assert has_control(string) is (strip_control(string) != string)
