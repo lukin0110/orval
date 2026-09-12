@@ -128,7 +128,15 @@ class _Unhashable:
         return 0
 
     def __eq__(self, other: object) -> bool:
-        return isinstance(other, _Unhashable) and bool(self.value == other.value)
+        if not isinstance(other, _Unhashable):
+            return False
+        if self.value is other.value:
+            return True
+        try:
+            return bool(self.value == other.value)
+        except (TypeError, ValueError):
+            # An equality that is not a boolean (a numpy array, a pandas Series) decides nothing.
+            return False
 
 
 def _mark(value: Any) -> Any:
@@ -145,7 +153,9 @@ def unique(seq: Iterable[T], key: Callable[[T], Any] | Iterable[Callable[[T], An
 
     The order of the remaining items is preserved, unlike ``set(seq)``. Items are compared by
     equality and do not have to be hashable: dictionaries, lists and other unhashable values
-    work too, at the cost of a linear scan over the unhashable values seen so far.
+    work too, at the cost of a linear scan over the unhashable values seen so far. Values whose
+    ``==`` answers with something other than a boolean, such as a numpy array or a pandas
+    Series, are kept as distinct unless they are the same object, rather than raising.
 
     ``key`` decides what makes two items duplicates. A single callable deduplicates on its
     return value, so a callable returning a tuple deduplicates on a combination of fields. An
