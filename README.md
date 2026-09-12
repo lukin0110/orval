@@ -168,6 +168,23 @@ compact([0, 1, None, 2, False, 3, ""], none_only=False)
 ```
 
 ```python
+# Order-preserving deduplication, where set() loses the order and dict.fromkeys()
+# needs hashable items. 'key' picks what makes two items duplicates: one callable,
+# or several to deduplicate on any of them (e.g. an id or an email).
+from orval import unique
+
+unique([3, 1, 3, 2, 1])
+# Output: [3, 1, 2]
+unique(["Great", "great", "Scott"], key=str.lower)
+# Output: ['Great', 'Scott']
+unique([{"a": 1}, {"a": 1}, {"b": 2}])
+# Output: [{'a': 1}, {'b': 2}]
+rows = [{"id": 1, "email": "marty@bttf.com"}, {"id": 2, "email": "marty@bttf.com"}]
+unique(rows, key=[lambda r: r["id"], lambda r: r["email"]])
+# Output: [{'id': 1, 'email': 'marty@bttf.com'}]
+```
+
+```python
 # Check whether a value is empty: None or a sized container without elements.
 # Unlike truthiness, 0 and False are not empty.
 from orval import is_empty

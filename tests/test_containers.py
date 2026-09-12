@@ -2,12 +2,13 @@
 
 import re
 from collections.abc import Iterable
+from operator import itemgetter
 from typing import Any
 
 import pytest
 from typeguard import suppress_type_checks
 
-from orval import chunkify, compact, deep_get, deep_merge, deep_set, flatten, is_empty, omit, pick
+from orval import chunkify, compact, deep_get, deep_merge, deep_set, flatten, is_empty, omit, pick, unique
 
 
 @pytest.mark.parametrize(
@@ -109,6 +110,124 @@ def test_compact_varargs() -> None:
     assert compact() == []
     assert compact("abc") == ["abc"]  # A single string is one value, not iterated.
     assert compact("a", None, "b") == ["a", "b"]
+
+
+@pytest.mark.parametrize(
+    ("sequence", "expected"),
+    [
+        ([3, 1, 3, 2, 1], [3, 1, 2]),  # Keeps the first occurrence, in order
+        ([1, 2, 3], [1, 2, 3]),  # Nothing to remove
+        ([], []),  # Empty list
+        ([1, 1, 1], [1]),  # All duplicates
+        ((1, 2, 1), [1, 2]),  # Tuple
+        (range(3), [0, 1, 2]),  # Range
+        ("banana", ["b", "a", "n"]),  # A string is iterated as characters
+        ([None, None, 0, ""], [None, 0, ""]),  # Falsy values are kept, not dropped
+        ([1, 1.0, True], [1]),  # Equal values collapse, as in a set: 1 == 1.0 == True
+        ([0, False], [0]),  # Equal values collapse, as in a set: 0 == False
+        ([{"a": 1}, {"a": 1}, {"b": 2}], [{"a": 1}, {"b": 2}]),  # Unhashable items
+        ([[1], [1], [2]], [[1], [2]]),  # Unhashable items, mixed lengths
+        ([{"a": 1}, 1, {"a": 1}, 1], [{"a": 1}, 1]),  # Hashable and unhashable mixed
+    ],
+)
+def test_unique(sequence: Iterable[Any], expected: list[Any]) -> None:
+    """Should drop duplicates while preserving the order of first appearance."""
+    assert unique(sequence) == expected
+
+
+def test_unique_generator() -> None:
+    """Should consume an iterator exactly once."""
+    assert unique(i % 3 for i in range(10)) == [0, 1, 2]
+
+
+def test_unique_key() -> None:
+    """Should deduplicate on the value returned by the key function."""
+    assert unique(["Great", "great", "Scott"], key=str.lower) == ["Great", "Scott"]
+    assert unique([1, -1, 2, -2, 3], key=abs) == [1, 2, 3]
+    assert unique([{"id": 1}, {"id": 1}, {"id": 2}], key=itemgetter("id")) == [{"id": 1}, {"id": 2}]
+
+
+def test_unique_tuple_key() -> None:
+    """Should deduplicate on a combination of fields when the key returns a tuple."""
+    rows = [
+        {"first": "Marty", "last": "McFly"},
+        {"first": "Marty", "last": "Brown"},
+        {"first": "Marty", "last": "McFly"},
+    ]
+    assert unique(rows, key=itemgetter("first", "last")) == rows[:2]
+
+
+def test_unique_unhashable_key() -> None:
+    """Should deduplicate on key values that cannot be hashed."""
+    rows = [{"tags": ["a"]}, {"tags": ["a"]}, {"tags": ["b"]}]
+    assert unique(rows, key=itemgetter("tags")) == [{"tags": ["a"]}, {"tags": ["b"]}]
+
+
+def test_unique_multiple_keys() -> None:
+    """Should drop an item that collides on any one of the key functions."""
+    rows = [
+        {"id": 1, "email": "marty@bttf.com"},  # Kept, so its id and email are remembered
+        {"id": 2, "email": "marty@bttf.com"},  # Dropped: the email of a kept item
+        {"id": 1, "email": "doc@bttf.com"},  # Dropped: the id of a kept item
+        {"id": 3, "email": "doc@bttf.com"},  # Kept: no kept item had id 3 or that email
+        {"id": 4, "email": "jennifer@bttf.com"},  # Kept: neither key collides
+    ]
+    keys = [itemgetter("id"), itemgetter("email")]
+    assert unique(rows, key=keys) == [rows[0], rows[3], rows[4]]
+
+
+def test_unique_keys_do_not_collide() -> None:
+    """Should keep the values of different key functions apart."""
+    rows = [{"a": 1, "b": 2}, {"a": 2, "b": 1}]
+    assert unique(rows, key=[itemgetter("a"), itemgetter("b")]) == rows
+
+
+def test_unique_only_kept_items_are_remembered() -> None:
+    """Should compare later items against the kept ones, not against the dropped ones."""
+    rows = [
+        {"id": 1, "email": "marty@bttf.com"},
+        {"id": 2, "email": "marty@bttf.com"},  # Dropped: its id 2 is not remembered
+        {"id": 2, "email": "doc@bttf.com"},  # Kept: id 2 was never kept before
+    ]
+    assert unique(rows, key=[itemgetter("id"), itemgetter("email")]) == [rows[0], rows[2]]
+
+
+def test_unique_key_called_once_per_item() -> None:
+    """Should stop at the first colliding key function instead of calling them all."""
+    calls: list[str] = []
+
+    def first(item: dict[str, int]) -> int:
+        calls.append("first")
+        return item["a"]
+
+    def second(item: dict[str, int]) -> int:
+        calls.append("second")
+        return item["b"]
+
+    assert unique([{"a": 1, "b": 1}, {"a": 1, "b": 2}], key=[first, second]) == [{"a": 1, "b": 1}]
+    assert calls == ["first", "second", "first"]
+
+
+def test_unique_empty_keys() -> None:
+    """Should raise a ValueError for an empty iterable of key functions."""
+    with pytest.raises(ValueError, match=re.escape("Key must contain at least one callable.")):
+        unique([1, 2], key=[])
+
+
+@suppress_type_checks
+def test_unique_invalid_key() -> None:
+    """Should raise a TypeError for a key that is not a callable or an iterable of callables."""
+    with pytest.raises(TypeError, match=re.escape("Key must be a callable or an iterable of callables.")):
+        unique([1, 2], key=["not a callable"])  # ty: ignore[invalid-argument-type]
+    with pytest.raises(TypeError):
+        unique([1, 2], key=42)  # ty: ignore[invalid-argument-type]
+
+
+def test_unique_does_not_mutate_input() -> None:
+    """Should leave the input sequence untouched."""
+    sequence = [1, 2, 1]
+    assert unique(sequence) == [1, 2]
+    assert sequence == [1, 2, 1]
 
 
 @pytest.mark.parametrize(

@@ -1,7 +1,7 @@
 """Array utilities."""
 
 import re
-from collections.abc import Generator, Iterable, Sized
+from collections.abc import Callable, Generator, Iterable, Sized
 from itertools import islice
 from typing import Any, TypeVar, cast
 
@@ -113,6 +113,107 @@ def compact(*seq: T | Iterable[T], none_only: bool = True) -> list[T]:  # ruff: 
     if none_only:
         return [item for item in items if item is not None]
     return [item for item in items if item]
+
+
+class _Unhashable:
+    """An unhashable key value wrapped so it can live in a set, comparing by equality."""
+
+    __slots__ = ("value",)
+
+    def __init__(self, value: Any) -> None:
+        self.value = value
+
+    def __hash__(self) -> int:
+        # A constant hash puts every unhashable value in one bucket, where __eq__ decides.
+        return 0
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, _Unhashable) and bool(self.value == other.value)
+
+
+def _mark(value: Any) -> Any:
+    """Return a hashable stand-in for a key value, wrapping it when it cannot be hashed."""
+    try:
+        hash(value)
+    except TypeError:
+        return _Unhashable(value)
+    return value
+
+
+def unique(seq: Iterable[T], key: Callable[[T], Any] | Iterable[Callable[[T], Any]] | None = None) -> list[T]:  # ruff: ignore[non-pep695-generic-function]
+    """Remove duplicates from an iterable, keeping the first occurrence of each item.
+
+    The order of the remaining items is preserved, unlike ``set(seq)``. Items are compared by
+    equality and do not have to be hashable: dictionaries, lists and other unhashable values
+    work too, at the cost of a linear scan over the unhashable values seen so far.
+
+    ``key`` decides what makes two items duplicates. A single callable deduplicates on its
+    return value, so a callable returning a tuple deduplicates on a combination of fields. An
+    iterable of callables deduplicates on *any* of them: an item is dropped as soon as one of
+    the key functions returns a value that function returned for an earlier item, which is what
+    you want when several fields each identify an item on their own. The key functions do not
+    collide with each other; each one remembers its own values. Only kept items are remembered,
+    so the first item of a group decides what the ones after it collide with.
+
+    Parameters
+    ----------
+    seq : Iterable
+        The iterable to deduplicate.
+    key : Callable or Iterable of Callable, optional
+        A function of one item returning the value to deduplicate on, or an iterable of such
+        functions to deduplicate on any of them. Defaults to the items themselves.
+
+    Returns
+    -------
+    list
+        A new list without duplicates, in order of first appearance.
+
+    Raises
+    ------
+    TypeError
+        If key is neither a callable nor an iterable of callables.
+    ValueError
+        If key is an empty iterable.
+
+    Examples
+    --------
+    >>> unique([3, 1, 3, 2, 1])
+    [3, 1, 2]
+    >>> unique(["Great", "great", "Scott"], key=str.lower)
+    ['Great', 'Scott']
+    >>> unique([{"a": 1}, {"a": 1}, {"b": 2}])
+    [{'a': 1}, {'b': 2}]
+    >>> rows = [{"id": 1, "email": "marty@bttf.com"}, {"id": 2, "email": "marty@bttf.com"}]
+    >>> unique(rows, key=[lambda r: r["id"], lambda r: r["email"]])
+    [{'id': 1, 'email': 'marty@bttf.com'}]
+    """
+    if key is None:
+        funcs: tuple[Callable[[T], Any], ...] = (lambda item: item,)
+    elif callable(key):
+        # A key that is both callable and iterable is treated as one key function.
+        funcs = (cast("Callable[[T], Any]", key),)
+    else:
+        if not isinstance(key, Iterable):
+            raise TypeError("Key must be a callable or an iterable of callables.")
+        funcs = tuple(key)
+        if not funcs:
+            raise ValueError("Key must contain at least one callable.")
+        if not all(callable(func) for func in funcs):
+            raise TypeError("Key must be a callable or an iterable of callables.")
+    seen: list[set[Any]] = [set() for _ in funcs]
+    result: list[T] = []
+    for item in seq:
+        marks: list[tuple[Any, set[Any]]] = []
+        for func, values in zip(funcs, seen, strict=True):
+            mark = _mark(func(item))
+            if mark in values:
+                break
+            marks.append((mark, values))
+        else:
+            result.append(item)
+            for mark, values in marks:
+                values.add(mark)
+    return result
 
 
 def is_empty(value: Any) -> bool:

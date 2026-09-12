@@ -4,7 +4,18 @@ from importlib import metadata
 
 from orval.byte_utils import parse_bytes, pretty_bytes
 from orval.coercion import safe_float, safe_int, to_bool
-from orval.containers import chunkify, compact, deep_get, deep_merge, deep_set, flatten, is_empty, omit, pick
+from orval.containers import (
+    chunkify,
+    compact,
+    deep_get,
+    deep_merge,
+    deep_set,
+    flatten,
+    is_empty,
+    omit,
+    pick,
+    unique,
+)
 from orval.datetimes import to_utc, utcnow
 from orval.duration_utils import parse_duration, pretty_duration
 from orval.hashing import hashify
@@ -64,5 +75,6 @@ __all__ = [
     "train_case",
     "truncate",
     "truncate_tokens",
+    "unique",
     "utcnow",
 ]
