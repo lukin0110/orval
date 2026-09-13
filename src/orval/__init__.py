@@ -35,6 +35,7 @@ from orval.strings import (
     strip_styling,
     train_case,
     truncate,
+    truncate_bytes,
 )
 from orval.token_utils import estimate_tokens, truncate_tokens
 from orval.utils import coalesce, coalesce_lazy, timing
@@ -79,6 +80,7 @@ __all__ = [
     "to_utc",
     "train_case",
     "truncate",
+    "truncate_bytes",
     "truncate_tokens",
     "unique",
     "utcnow",
