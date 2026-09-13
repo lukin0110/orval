@@ -268,6 +268,25 @@ to_utc(datetime.datetime(2024, 1, 1, 12, 0), assume_utc=False)
 # Raises: ValueError: Datetime must be timezone-aware.
 ```
 
+```python
+# Convert a datetime to a target time zone. A naive datetime is first assumed to be in `assume`,
+# or in the target zone itself when `assume` is omitted; an aware datetime is converted, which a
+# bare replace(tzinfo=...) would not do.
+import datetime
+from zoneinfo import ZoneInfo
+from orval import to_tz
+
+brussels = ZoneInfo("Europe/Brussels")
+to_tz(datetime.datetime(2024, 7, 15, 9, 0), brussels)
+# Output: datetime.datetime(2024, 7, 15, 9, 0, tzinfo=zoneinfo.ZoneInfo(key='Europe/Brussels'))
+to_tz(datetime.datetime(2024, 7, 15, 9, 0), datetime.UTC, assume=brussels)
+# Output: datetime.datetime(2024, 7, 15, 7, 0, tzinfo=datetime.timezone.utc)
+to_tz(datetime.datetime(2024, 1, 15, 9, 0), datetime.UTC, assume=brussels)
+# Output: datetime.datetime(2024, 1, 15, 8, 0, tzinfo=datetime.timezone.utc)
+to_tz(datetime.datetime(2024, 7, 15, 9, 0, tzinfo=datetime.UTC), brussels)
+# Output: datetime.datetime(2024, 7, 15, 11, 0, tzinfo=zoneinfo.ZoneInfo(key='Europe/Brussels'))
+```
+
 ### Misc utils
 ```python
 # Hash any Python object.
