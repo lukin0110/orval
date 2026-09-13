@@ -161,6 +161,13 @@ def test_to_tz_tzinfo_without_offset() -> None:
     assert to_tz(value, BRUSSELS) == NAIVE.replace(tzinfo=BRUSSELS)
 
 
+@pytest.mark.parametrize("kwargs", [{}, {"assume": _NoOffset()}])
+def test_to_tz_unusable_target(kwargs: dict[str, datetime.tzinfo]) -> None:
+    """Should raise rather than fall back to system-local time when the assumed zone has no offset."""
+    with pytest.raises(ValueError, match=r"'tz' and 'assume' must provide a UTC offset."):
+        to_tz(NAIVE, _NoOffset(), **kwargs)
+
+
 def test_to_tz_round_trips_with_to_utc() -> None:
     """Should read a UTC datetime back as local wall-clock time."""
     value = datetime.datetime(2024, 7, 15, 9, 0)
