@@ -68,9 +68,10 @@ def to_tz(value: datetime.datetime, tz: datetime.tzinfo, *, assume: datetime.tzi
     in 'assume', or in 'tz' itself when 'assume' is ``None``, in which case a time zone is
     attached without shifting the wall-clock time. A datetime counts as naive when its 'tzinfo'
     is ``None`` or its 'utcoffset' returns ``None``, as in the standard library; ``astimezone``
-    would otherwise silently interpret it as system-local time. Naive values are always assumed,
-    so both 'tz' and 'assume' must report a UTC offset. Ambiguous and non-existent local times,
-    around a daylight saving transition, follow the standard library's ``fold`` attribute.
+    would otherwise silently interpret it as system-local time. For the same reason the zone a
+    naive value is assumed to be in must report a UTC offset, and raises when it does not.
+    Ambiguous and non-existent local times, around a daylight saving transition, follow the
+    standard library's ``fold`` attribute.
 
     Parameters
     ----------
@@ -86,6 +87,11 @@ def to_tz(value: datetime.datetime, tz: datetime.tzinfo, *, assume: datetime.tzi
     datetime.datetime
         The same instant expressed in 'tz'.
 
+    Raises
+    ------
+    ValueError
+        If 'value' is naive and the zone it is assumed to be in has no UTC offset.
+
     Examples
     --------
     >>> cet = datetime.timezone(datetime.timedelta(hours=1))
@@ -98,4 +104,6 @@ def to_tz(value: datetime.datetime, tz: datetime.tzinfo, *, assume: datetime.tzi
     """
     if _is_naive(value):
         value = value.replace(tzinfo=tz if assume is None else assume)
+        if _is_naive(value):
+            raise ValueError("'tz' and 'assume' must provide a UTC offset.")
     return value.astimezone(tz)

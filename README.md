@@ -271,7 +271,8 @@ to_utc(datetime.datetime(2024, 1, 1, 12, 0), assume_utc=False)
 ```python
 # Convert a datetime to a target time zone. A naive datetime is first assumed to be in `assume`,
 # or in the target zone itself when `assume` is omitted; an aware datetime is converted, which a
-# bare replace(tzinfo=...) would not do.
+# bare replace(tzinfo=...) would not do. ZoneInfo reads an IANA time zone database, which some
+# platforms lack; install the tzdata package there.
 import datetime
 from zoneinfo import ZoneInfo
 from orval import to_tz
