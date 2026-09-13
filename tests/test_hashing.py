@@ -108,12 +108,16 @@ def test__sanity_checks__success(alg: str, obj: Any, expected: str) -> None:
 
 
 def test__bytes_like__success() -> None:
-    """Should hash bytes-like objects as their raw content, just like a str."""
+    """Should hash bytes-like objects as their raw content, not as their pickle."""
     # The digest is the digest of the payload itself, comparable with anything produced outside Python.
     assert hashify(b"great scott") == hashlib.sha256(b"great scott").hexdigest()
     assert hashify(b"great scott", "sha1") == hashlib.sha1(b"great scott").hexdigest()  # ruff: ignore[hashlib-insecure-hash-function]
     # The same content hashes the same, whichever bytes-like type carries it.
-    assert hashify(b"great scott") == hashify("great scott")
     assert hashify(bytearray(b"great scott")) == hashify(b"great scott")
     assert hashify(memoryview(b"great scott")) == hashify(b"great scott")
-    assert hashify(b"") == hashify("") == hashlib.sha256(b"").hexdigest()
+    assert hashify(b"") == hashify(bytearray()) == hashlib.sha256(b"").hexdigest()
+    # A str hashes as its UTF-8 encoding, so it matches a bytes input exactly when that input is that encoding.
+    # It coincides for ASCII, but the encoding is what decides, not the characters.
+    assert hashify(b"great scott") == hashify("great scott")
+    assert hashify("1.21 gigawatts \u26a1") == hashify("1.21 gigawatts \u26a1".encode())
+    assert hashify("1.21 gigawatts \u26a1") != hashify("1.21 gigawatts \u26a1".encode("utf-16"))
