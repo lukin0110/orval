@@ -275,6 +275,8 @@ from orval import hashify
 
 hashify("great scott")
 # Output: 6617ae826b0b76ba9f3a568a2bbf6c67aec8f575eec69badaf7110091d3f5cc6
+hashify(b"great scott")
+# Output: 6617ae826b0b76ba9f3a568a2bbf6c67aec8f575eec69badaf7110091d3f5cc6 (raw bytes, same digest as the str above)
 hashify({"great": "scott"})
 # Output: 1d63b966aa065f76392c3e4a7caa7b1bfce39c889e5faf0df0198b9ff5d0f434
 

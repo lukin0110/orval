@@ -11,6 +11,12 @@ def hashify(obj: Any, alg: str = "sha256") -> str:
     Handles both hashable and unhashable objects. For general-purpose cryptographic needs, SHA-256 is often the best
     choice due to its balance of security, speed, and widespread adoption.
 
+    Input:
+    - A `str` is hashed as its UTF-8 encoding.
+    - A `bytes`, `bytearray` or `memoryview` is hashed as its raw content, so the digest matches the one produced by
+      standard tooling (`sha1sum`, another language, a stored ETag, ...) for the same payload.
+    - Any other object is serialised with `pickle` first, which makes the digest specific to Python.
+
     Output:
     - The function returns the hash as a hexadecimal string, making it suitable for storage and comparison.
     - This approach ensures the function works for a broad range of Python objects.
@@ -34,6 +40,8 @@ def hashify(obj: Any, alg: str = "sha256") -> str:
     hasher = hashlib.new(alg, usedforsecurity=False)
     if isinstance(obj, str):
         hasher.update(obj.encode())
+    elif isinstance(obj, bytes | bytearray | memoryview):
+        hasher.update(obj)
     else:
         bytes_: bytes = pickle.dumps(obj, protocol=3)
         hasher.update(bytes_)

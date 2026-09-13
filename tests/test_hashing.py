@@ -1,5 +1,6 @@
 """Tests hashify function."""
 
+import hashlib
 from decimal import Decimal
 from itertools import product
 from typing import Any
@@ -31,7 +32,22 @@ GUARANTEED_PRODUCT = [(x, y) for x, y in product(GUARANTEED_ALGORITHMS.keys(), G
 @pytest.mark.parametrize(("alg", "length"), GUARANTEED_LENGTHS)
 def test__algorithms__success(alg: str, length: int) -> None:
     """Should return a hexadecimal string representing any python object."""
-    values = ["great scott", "", None, 1, 1.1, Decimal("1.1"), {"g": "s"}, {1, 2}, [1, 2], object()]
+    values = [
+        "great scott",
+        "",
+        b"great scott",
+        b"",
+        bytearray(b"great scott"),
+        memoryview(b"great scott"),
+        None,
+        1,
+        1.1,
+        Decimal("1.1"),
+        {"g": "s"},
+        {1, 2},
+        [1, 2],
+        object(),
+    ]
     for value in values:
         result = hashify(value, alg)
         assert isinstance(result, str)
@@ -62,7 +78,9 @@ def test___unsupported_algorithm__fairure() -> None:
             [],
             "d34b2ff3ebd47dff1d21eee2d69d4ffd",
         ),
+        ("md5", b"great", "acaa16770db76c1ffb9cee51c3cabfcf"),
         ("sha256", "scott", "12a303c224c250d07c81691de6e0fd74699ce6bd78c234057de70413a58457cf"),
+        ("sha256", b"scott", "12a303c224c250d07c81691de6e0fd74699ce6bd78c234057de70413a58457cf"),
         ("sha256", 1, "4d672a9db795f0105d536626cd190c28ed199cc8d145e2349e5457f7ff6f38be"),
         ("sha256", set(), "0cdaff94fb5e168a49c2a0b2807ed3972fce8e480f1250e43ec781d150f077ec"),
         ("sha256", object(), "73f109a46d7d1ba94c6ce0997ab29937fcc86e2ec93468b76c7ac8cfa0919638"),
@@ -87,3 +105,15 @@ def test__sanity_checks__success(alg: str, obj: Any, expected: str) -> None:
     Is there a better approach to do sanity checks without listing a huge table of parameterized values?
     """
     assert hashify(obj, alg=alg) == expected, f"{alg}={type(obj)}"
+
+
+def test__bytes_like__success() -> None:
+    """Should hash bytes-like objects as their raw content, just like a str."""
+    # The digest is the digest of the payload itself, comparable with anything produced outside Python.
+    assert hashify(b"great scott") == hashlib.sha256(b"great scott").hexdigest()
+    assert hashify(b"great scott", "sha1") == hashlib.sha1(b"great scott").hexdigest()  # ruff: ignore[hashlib-insecure-hash-function]
+    # The same content hashes the same, whichever bytes-like type carries it.
+    assert hashify(b"great scott") == hashify("great scott")
+    assert hashify(bytearray(b"great scott")) == hashify(b"great scott")
+    assert hashify(memoryview(b"great scott")) == hashify(b"great scott")
+    assert hashify(b"") == hashify("") == hashlib.sha256(b"").hexdigest()
