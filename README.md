@@ -99,6 +99,17 @@ has_control("café こんにちは")
 ```
 
 ```python
+# Collapse runs of whitespace to a single space and strip both ends, leaving
+# punctuation, case and accents untouched.
+from orval import squish
+
+squish("  Great   Scott  ")
+# Output: Great Scott
+squish("hello\nworld")
+# Output: hello world
+```
+
+```python
 # Redact sensitive values (API keys, tokens, card numbers) while keeping a few
 # characters visible. Strings with 'show' or fewer characters are fully masked.
 from orval import mask
