@@ -16,7 +16,7 @@ from orval.containers import (
     pick,
     unique,
 )
-from orval.datetimes import to_utc, utcnow
+from orval.datetimes import to_tz, to_utc, utcnow
 from orval.duration_utils import parse_duration, pretty_duration
 from orval.hashing import hashify
 from orval.number_utils import pretty_number
@@ -73,6 +73,7 @@ __all__ = [
     "strip_styling",
     "timing",
     "to_bool",
+    "to_tz",
     "to_utc",
     "train_case",
     "truncate",
