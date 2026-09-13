@@ -264,6 +264,72 @@ def truncate(string: str, number: int, /, suffix: str = "...") -> str:
     return f"{string[: number - len(suffix)]}{suffix}"
 
 
+def truncate_bytes(string: str, max_bytes: int, /, suffix: str = "") -> str:
+    """Truncate so that the UTF-8 encoding is at most 'max_bytes', never mid-character.
+
+    Where 'truncate' counts characters, this counts the bytes of the UTF-8 encoding, the
+    limit that protocols and storage actually impose: the 75-octet line length of an iCalendar
+    (RFC 5545) fold, the 4096-byte cap on a web push payload, a ``VARCHAR`` column whose length
+    is measured in bytes. Cutting the encoded form directly can land inside a multi-byte
+    sequence and produce invalid UTF-8; this backs the cut up to the nearest character boundary
+    instead, dropping the partial character whole.
+
+    If the string already fits it is returned unchanged. Because characters vary in width, a
+    truncated result is at most 'max_bytes' rather than exactly 'max_bytes': backing off a
+    boundary can leave up to three bytes unused.
+
+    A string holding a lone surrogate has no UTF-8 encoding, so 'UnicodeEncodeError'
+    propagates from the encode step. Truncation is per character, not per grapheme cluster: a
+    combining accent can be separated from the letter it modifies, and an emoji joined by
+    zero-width joiners can be cut between its parts.
+
+    Parameters
+    ----------
+    string
+        The string to truncate.
+    max_bytes
+        The maximum number of bytes the UTF-8 encoding of the result may occupy.
+    suffix
+        Appended to the cut string to signal truncation (default is ""). Its own encoded
+        length counts toward 'max_bytes'.
+
+    Returns
+    -------
+    str
+        The string, or a prefix of it plus the suffix, encoding to at most 'max_bytes' bytes.
+
+    Raises
+    ------
+    ValueError
+        If 'max_bytes' is not a positive integer, or if the encoded 'suffix' is not shorter
+        than 'max_bytes'.
+
+    Examples
+    --------
+    >>> truncate_bytes("héllo wörld", 9)
+    'héllo w'
+    >>> truncate_bytes("日本語", 7)
+    '日本'
+    >>> truncate_bytes("日本語", 7, suffix="…")
+    '日…'
+    >>> truncate_bytes("hello", 8)
+    'hello'
+    """
+    if max_bytes <= 0:
+        raise ValueError("Max bytes must be a positive integer.")
+    suffix_bytes = len(suffix.encode("utf-8"))
+    if suffix_bytes >= max_bytes:
+        raise ValueError("Suffix must be shorter than the number of bytes.")
+    encoded = string.encode("utf-8")
+    if len(encoded) <= max_bytes:
+        return string
+    # Slicing the encoded bytes can land inside a multi-byte sequence, which is exactly what
+    # "ignore" discards: it already knows where the character boundaries are, so there is no
+    # need to scan back over continuation bytes by hand. Nothing else can be dropped, because
+    # the bytes came from a str and the cut tail is the only part that can be invalid.
+    return f"{encoded[: max_bytes - suffix_bytes].decode('utf-8', 'ignore')}{suffix}"
+
+
 def mask(string: str, /, show: int = 4, side: str = "r", mask_char: str = "*") -> str:
     """Mask a string, keeping a few characters visible.
 

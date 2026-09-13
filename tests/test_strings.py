@@ -17,6 +17,7 @@ from orval import (
     strip_styling,
     train_case,
     truncate,
+    truncate_bytes,
 )
 
 
@@ -273,6 +274,73 @@ def test_truncate_respects_limit() -> None:
                 assert string.startswith(result[: number - len(suffix)])
             else:
                 assert result == string
+
+
+@pytest.mark.parametrize(
+    ("string", "max_bytes", "suffix", "expected"),
+    [
+        # ASCII encodes one byte per character, so the byte budget is the character budget.
+        ("hello world", 8, "", "hello wo"),
+        ("hello world", 8, "...", "hello..."),
+        ("hello world", 11, "...", "hello world"),
+        ("hello world", 12, "...", "hello world"),
+        ("", 5, "...", ""),
+        # 'héllo wörld' encodes to 13 bytes: 'é' and 'ö' take two each.
+        ("héllo wörld", 8, "", "héllo w"),
+        # Byte 9 would split 'ö', so the whole character is dropped and a byte goes unused.
+        ("héllo wörld", 9, "", "héllo w"),
+        ("héllo wörld", 10, "", "héllo wö"),
+        ("héllo wörld", 13, "", "héllo wörld"),
+        # Three bytes per character: a cut can leave one or two bytes unused.
+        ("日本語", 7, "", "日本"),
+        ("日本語", 8, "", "日本"),
+        ("日本語", 9, "", "日本語"),
+        # An emoji takes four bytes and is never split, however close the budget comes.
+        ("a💩b", 4, "", "a"),
+        ("a💩b", 5, "", "a💩"),
+        ("a💩b", 6, "", "a💩b"),
+        # The suffix is encoded too: '…' spends three of the available bytes.
+        ("日本語", 7, "…", "日…"),
+        ("hello world", 8, "…", "hello…"),
+    ],
+)
+def test_truncate_bytes(string: str, max_bytes: int, suffix: str, expected: str) -> None:
+    """Should truncate a string to at most a certain number of UTF-8 bytes."""
+    assert truncate_bytes(string, max_bytes, suffix) == expected
+
+
+def test_truncate_bytes_invalid() -> None:
+    """Should raise a ValueError for a non-positive 'max_bytes' or an oversized 'suffix'."""
+    with pytest.raises(ValueError, match=r"Max bytes must be a positive integer."):
+        truncate_bytes("hello world", 0)
+    with pytest.raises(ValueError, match=r"Max bytes must be a positive integer."):
+        truncate_bytes("hello world", -1)
+    with pytest.raises(ValueError, match=r"Suffix must be shorter than the number of bytes."):
+        truncate_bytes("hello world", 3, "...")
+    # The suffix is measured in bytes, so a single-character '…' already needs four.
+    with pytest.raises(ValueError, match=r"Suffix must be shorter than the number of bytes."):
+        truncate_bytes("hello world", 3, "…")
+    # The check depends only on the arguments, not on whether the input would need cutting.
+    with pytest.raises(ValueError, match=r"Suffix must be shorter than the number of bytes."):
+        truncate_bytes("a", 2, "...")
+
+
+@pytest.mark.parametrize("suffix", ["", ".", "...", "…"])
+def test_truncate_bytes_respects_limit(suffix: str) -> None:
+    """Should never exceed 'max_bytes', and never cut a character in half."""
+    string = "aé日\U0001f600büz"
+    encoded_length = len(string.encode("utf-8"))
+    for max_bytes in range(len(suffix.encode("utf-8")) + 1, encoded_length + 4):
+        result = truncate_bytes(string, max_bytes, suffix)
+        assert len(result.encode("utf-8")) <= max_bytes
+        if encoded_length <= max_bytes:
+            assert result == string
+        else:
+            assert result.endswith(suffix)
+            # A prefix of the original can only survive the round trip if no character was
+            # split: a partial sequence would have decoded to a replacement or been dropped.
+            cut = result[: len(result) - len(suffix)] if suffix else result
+            assert string.startswith(cut)
 
 
 @pytest.mark.parametrize(

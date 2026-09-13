@@ -121,6 +121,20 @@ truncate("hello world", 8, suffix="")
 # Output: hello wo
 ```
 
+```python
+# Truncate so the UTF-8 encoding fits in 'max_bytes' without splitting a character.
+# For the limits protocols and storage impose: a 75-octet iCalendar (RFC 5545) fold,
+# a 4096-byte web push payload, a VARCHAR column measured in bytes.
+from orval import truncate_bytes
+
+truncate_bytes("héllo wörld", 9)
+# Output: héllo w
+truncate_bytes("日本語", 7)
+# Output: 日本
+truncate_bytes("日本語", 7, suffix="…")
+# Output: 日…
+```
+
 ### Token utils
 
 ```python
