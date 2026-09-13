@@ -12,6 +12,7 @@ from orval import (
     pascal_case,
     slugify,
     snake_case,
+    squish,
     strip_accents,
     strip_control,
     strip_styling,
@@ -490,3 +491,52 @@ def test_has_control(string: str, expected: bool) -> None:
 def test_has_control_matches_strip_control(string: str) -> None:
     """Should agree with 'strip_control' about which strings contain control characters."""
     assert has_control(string) is (strip_control(string) != string)
+
+
+@pytest.mark.parametrize(
+    ("string", "expected"),
+    [
+        ("hello world", "hello world"),
+        ("", ""),
+        ("   ", ""),
+        # Both ends are stripped.
+        ("  hello  ", "hello"),
+        ("\n\thello\n", "hello"),
+        # Interior runs collapse to a single space, whatever they are made of.
+        ("a    b", "a b"),
+        ("a\tb", "a b"),
+        ("hello\nworld", "hello world"),
+        ("a \t\n\r b", "a b"),
+        ("  Great   Scott  ", "Great Scott"),
+        # Unicode whitespace counts too: non-breaking space and en quad.
+        ("a\xa0b", "a b"),
+        ("a\u2000b", "a b"),
+        ("\xa0hello\xa0", "hello"),
+        # Punctuation, case, accents and non-Latin scripts are left untouched.
+        ("Great,  Scott!", "Great, Scott!"),
+        ("Héllo   Wörld", "Héllo Wörld"),
+        ("café   こんにちは", "café こんにちは"),
+        # Zero-width characters are not whitespace (see 'strip_styling').
+        ("hel\u200blo", "hel\u200blo"),
+    ],
+)
+def test_squish(string: str, expected: str) -> None:
+    """Should collapse whitespace runs to a single space and strip both ends."""
+    assert squish(string) == expected
+
+
+@pytest.mark.parametrize(
+    "string",
+    [
+        "hello world",
+        "",
+        "   ",
+        "  Great   Scott  ",
+        "a \t\n\r b",
+        "a\xa0b",
+        "hel\u200blo",
+    ],
+)
+def test_squish_is_idempotent(string: str) -> None:
+    """Should leave an already squished string unchanged."""
+    assert squish(squish(string)) == squish(string)

@@ -54,8 +54,7 @@ def _normalize(string: str, unicode: bool = True, compact_spaces: bool = True) -
         value = unicodedata.normalize("NFKD", string).encode("ascii", "ignore").decode("ascii")
         text = re.sub(r"[^\w\s]|_", " ", value)
 
-    # Replace multiple spaces with a single space
-    return re.sub(r"\s+", " ", text).strip() if compact_spaces else text.strip()
+    return squish(text) if compact_spaces else text.strip()
 
 
 def kebab_case(string: str, scream: bool = False, unicode: bool = True, compact_spaces: bool = True) -> str:
@@ -424,3 +423,37 @@ def has_control(string: str) -> bool:
         True if the string contains at least one ASCII control character, False otherwise.
     """
     return bool(_CONTROL_RE.search(string))
+
+
+def squish(string: str) -> str:
+    r"""Collapse consecutive whitespace to a single space and strip both ends.
+
+    Every run of whitespace — spaces, tabs, newlines, and Unicode whitespace such as
+    the non-breaking space ``U+00A0`` — becomes a single ordinary space, and leading
+    and trailing whitespace is removed. Everything else is left untouched: punctuation,
+    case, accents and non-Latin scripts all survive, unlike the casing helpers such as
+    'kebab_case' that normalize punctuation away too.
+
+    Useful for tidying values that arrive with incidental line breaks or indentation
+    (scraped HTML, copy/pasted text, a multi-line form field) before comparing or
+    storing them. Zero-width characters are not whitespace and are left in place; see
+    'strip_styling' for those.
+
+    Parameters
+    ----------
+    string
+        Input string to squish.
+
+    Returns
+    -------
+    str
+        The string with whitespace runs collapsed and both ends stripped.
+
+    Examples
+    --------
+    >>> squish("  Great   Scott  ")
+    'Great Scott'
+    >>> squish("hello\nworld")
+    'hello world'
+    """
+    return " ".join(string.split())
