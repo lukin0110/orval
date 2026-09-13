@@ -318,7 +318,8 @@ def test_truncate_bytes_invalid() -> None:
         truncate_bytes("hello world", -1)
     with pytest.raises(ValueError, match=r"Suffix must be shorter than the number of bytes."):
         truncate_bytes("hello world", 3, "...")
-    # The suffix is measured in bytes, so a single-character '…' already needs four.
+    # The suffix is measured in bytes, not characters: a one-character '…' takes three of them,
+    # which a three-byte budget cannot spare.
     with pytest.raises(ValueError, match=r"Suffix must be shorter than the number of bytes."):
         truncate_bytes("hello world", 3, "…")
     # The check depends only on the arguments, not on whether the input would need cutting.
