@@ -6,6 +6,7 @@ from typeguard import suppress_type_checks
 from orval import (
     camel_case,
     dot_case,
+    fence,
     has_control,
     kebab_case,
     mask,
@@ -609,3 +610,75 @@ def test_squish(string: str, expected: str) -> None:
 def test_squish_is_idempotent(string: str) -> None:
     """Should leave an already squished string unchanged."""
     assert squish(squish(string)) == squish(string)
+
+
+@pytest.mark.parametrize(
+    ("content", "char", "minimum", "expected"),
+    [
+        # Nothing to escape: the minimum is returned as is.
+        ("", "`", 3, "```"),
+        ("no fences here", "`", 3, "```"),
+        # Runs shorter than the minimum do not matter either.
+        ("inline `code` span", "`", 3, "```"),
+        ("a `` b", "`", 3, "```"),
+        # A fence inside the content pushes the result one longer.
+        ("```python\nprint()\n```", "`", 3, "````"),
+        # The longest run wins, wherever it sits.
+        ("````\n```\n", "`", 3, "`````"),
+        ("x ``````` y", "`", 3, "````````"),
+        # Runs are counted anywhere, not only at the start of a line.
+        ("a ``` b", "`", 3, "````"),
+        # Only the fence character counts.
+        ("~~~", "`", 3, "```"),
+        ("```", "~", 3, "~~~"),
+        ("~~~", "~", 3, "~~~~"),
+        # A single backtick is a valid inline code span delimiter.
+        ("a", "`", 1, "`"),
+        ("`", "`", 1, "``"),
+        ("a `` b", "`", 1, "```"),
+        # The minimum dominates a short run.
+        ("``", "`", 5, "`````"),
+        ("`````", "`", 5, "``````"),
+        # A regex metacharacter works as the fence character too.
+        ("a ** b", "*", 3, "***"),
+        ("a *** b", "*", 3, "****"),
+    ],
+)
+def test_fence(content: str, char: str, minimum: int, expected: str) -> None:
+    """Should return the shortest fence, at least 'minimum' long, that 'content' cannot close."""
+    assert fence(content, char=char, minimum=minimum) == expected
+
+
+def test_fence_invalid() -> None:
+    """Should raise a ValueError for a 'char' that is not one character or a non-positive 'minimum'."""
+    with pytest.raises(ValueError, match=r"Char must be a single character."):
+        fence("hello", char="")
+    with pytest.raises(ValueError, match=r"Char must be a single character."):
+        fence("hello", char="``")
+    with pytest.raises(ValueError, match=r"Minimum must be a positive integer."):
+        fence("hello", minimum=0)
+    with pytest.raises(ValueError, match=r"Minimum must be a positive integer."):
+        fence("hello", minimum=-1)
+
+
+@pytest.mark.parametrize(
+    "content",
+    [
+        "",
+        "plain text",
+        "a ``` b",
+        "````\n```",
+        "` `` ``` ````",
+        "```python\nprint('`')\n```\n",
+        "*+?[](){}|^$.\\ ``` *+?",
+    ],
+)
+def test_fence_cannot_be_closed(content: str) -> None:
+    """Should return the shortest run of at least 'minimum' backticks that does not occur in 'content'."""
+    for minimum in range(1, 6):
+        result = fence(content, minimum=minimum)
+        assert set(result) == {"`"}
+        assert len(result) >= minimum
+        assert result not in content
+        # Shortest: either the minimum was enough, or one backtick fewer would have been closable.
+        assert len(result) == minimum or result[:-1] in content

@@ -523,3 +523,55 @@ def squish(string: str) -> str:
     'hello world'
     """
     return " ".join(string.split())
+
+
+def fence(content: str, /, char: str = "`", minimum: int = 3) -> str:
+    """Return the shortest fence that 'content' cannot close early.
+
+    A Markdown fenced code block is closed by a run of the fence character at least as
+    long as the one that opened it, so untrusted text dropped inside a plain ``` fence
+    escapes into the surrounding document as soon as it contains a fence of its own. This
+    returns a run of 'char' one longer than the longest run found in 'content', but never
+    shorter than 'minimum': the shortest fence the content cannot close.
+
+    Every run counts, not only those at the start of a line, so the result is conservative
+    rather than exact. The same rule works for inline code spans ('minimum=1') and for
+    tilde fences ('char="~"').
+
+    Parameters
+    ----------
+    content
+        The text that will be placed between the fences.
+    char
+        The fence character (default is "`").
+    minimum
+        The shortest fence to return, whatever the content holds (default is 3, the
+        CommonMark minimum for a fenced code block).
+
+    Returns
+    -------
+    str
+        A run of 'char' that does not occur in 'content'.
+
+    Raises
+    ------
+    ValueError
+        If 'char' is not a single character, or 'minimum' is not a positive integer.
+
+    Examples
+    --------
+    >>> fence("no fences here")
+    '```'
+    >>> fence("a ``` b")
+    '````'
+    >>> fence("~~~", char="~")
+    '~~~~'
+    >>> fence("`", minimum=1)
+    '``'
+    """
+    if len(char) != 1:
+        raise ValueError("Char must be a single character.")
+    if minimum <= 0:
+        raise ValueError("Minimum must be a positive integer.")
+    longest = max((len(m.group()) for m in re.finditer(f"{re.escape(char)}+", content)), default=0)
+    return char * max(minimum, longest + 1)

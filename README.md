@@ -146,6 +146,20 @@ truncate_bytes("日本語", 7, suffix="…")
 # Output: 日…
 ```
 
+`````python
+# The shortest fence that 'content' cannot close early: one longer than the longest run
+# of the fence character inside, never shorter than 'minimum'. Use it whenever untrusted
+# text goes into a fenced block, so a message carrying its own ``` cannot break out.
+from orval import fence
+
+fence("no fences here")
+# Output: ```
+fence("```python\nprint('hi')\n```")
+# Output: ````
+fence("~~~", char="~")
+# Output: ~~~~
+`````
+
 ### Token utils
 
 ```python
